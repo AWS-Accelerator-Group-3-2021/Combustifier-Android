@@ -19,6 +19,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.Navigation
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.awsgroup3.combustifier.ui.theme.Typography
 
 class MainActivity : ComponentActivity() {
@@ -29,7 +36,7 @@ class MainActivity : ComponentActivity() {
             CombustifierTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    HomeScreen()
+                    MainScreen()
                 }
             }
         }
@@ -38,12 +45,16 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun MainScreen() {
+    val navController = rememberNavController()
     Scaffold(
-        topBar = { TopAppBar("Home") },
-        bottomBar = { BottomNavigationBar() },
-        content = {})
+        topBar = { TopAppBar("Test") },
+        bottomBar = { BottomNavigationBar(navController) }
+    ){
+        Navigation(navController)
+    }
 }
+
 
 @Composable
 fun TopAppBar(pageName: String) {
@@ -61,16 +72,41 @@ fun TopAppBar(pageName: String) {
 }
 
 @Composable
-fun BottomNavigationBar() {
-    var selectedItem by remember { mutableStateOf(0) }
+fun Navigation(navController: NavHostController) {
+    NavHost(navController, startDestination = NavigationItem.Home.route) {
+        composable(NavigationItem.Home.route) {
+            HomeScreen()
+        }
+        composable(NavigationItem.Measurement.route) {
+            MeasurementScreen()
+        }
+    }
+}
+
+@Composable
+fun BottomNavigationBar(navController: NavController) {
     NavigationBar {
+        var selectedIndex by remember { mutableStateOf(0) }
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
         //Home
         NavigationBarItem(
             icon = { Icon(Icons.Filled.Home, contentDescription = null) },
             label = { Text("Home") },
-            selected = selectedItem == 0,
-            onClick = { selectedItem = 0 }
+            selected = currentRoute == "Home",
+            onClick = {
+                navController.navigate("Home") {
+                    navController.graph.startDestinationRoute?.let { route ->
+                        popUpTo(route) {
+                            saveState = true
+                        }
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
         )
+        //Measurement
         NavigationBarItem(
             icon = {
                 Icon(
@@ -79,8 +115,18 @@ fun BottomNavigationBar() {
                 )
             },
             label = { Text("Measurement") },
-            selected = selectedItem == 1,
-            onClick = { selectedItem = 1 }
+            selected = currentRoute == "Measurement",
+            onClick = {
+                navController.navigate("Measurement") {
+                    navController.graph.startDestinationRoute?.let { route ->
+                        popUpTo(route) {
+                            saveState = true
+                        }
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
         )
     }
 }
