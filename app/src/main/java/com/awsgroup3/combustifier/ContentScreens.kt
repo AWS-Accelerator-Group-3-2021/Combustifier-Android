@@ -10,31 +10,44 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@ExperimentalMaterial3Api
 @Composable
 fun HomeScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
-    ){
-        Text(
-            text = "Home View Test"
+    CombustifierTheme {
+        Scaffold(
+            topBar = { TopAppBar(pageName = "Home") },
+            content = {}
         )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize(Alignment.Center)
+        ) {
+            Text(
+                text = "Home View Test"
+            )
+        }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@ExperimentalMaterial3Api
 @Composable
 fun MeasurementScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
-    ){
-        Text(
-            text = "Measurement View Test"
+    CombustifierTheme {
+        Scaffold(
+            topBar = { TopAppBar(pageName = "Measurement") },
+            content = {}
         )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize(Alignment.Center)
+        ) {
+            Text(
+                text = "Measurement View Test"
+            )
+        }
     }
 }

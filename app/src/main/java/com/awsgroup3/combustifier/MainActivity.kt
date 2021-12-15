@@ -3,33 +3,30 @@ package com.awsgroup3.combustifier
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
-import androidx.compose.runtime.*
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.res.fontResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.Navigation
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import com.awsgroup3.combustifier.ui.theme.Typography
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
+    @ExperimentalMaterial3Api
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -43,14 +40,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@ExperimentalMaterial3Api
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
     Scaffold(
-        topBar = { TopAppBar("Test") },
         bottomBar = { BottomNavigationBar(navController) }
-    ){
+    ) {
         Navigation(navController)
     }
 }
@@ -61,16 +57,20 @@ fun TopAppBar(pageName: String) {
     SmallTopAppBar(
         title = {
             Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp, 48.dp,24.dp,24.dp)
+                ,
                 text = pageName,
                 fontFamily = Typography.titleLarge.fontFamily,
                 fontSize = 32.sp,
-                fontWeight = FontWeight.SemiBold
-
+                fontWeight = FontWeight.SemiBold,
             )
         }
     )
 }
 
+@ExperimentalMaterial3Api
 @Composable
 fun Navigation(navController: NavHostController) {
     NavHost(navController, startDestination = NavigationItem.Home.route) {
@@ -85,8 +85,7 @@ fun Navigation(navController: NavHostController) {
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
-    NavigationBar {
-        var selectedIndex by remember { mutableStateOf(0) }
+    NavigationBar (){
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         //Home
