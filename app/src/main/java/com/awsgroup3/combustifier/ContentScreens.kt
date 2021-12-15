@@ -4,9 +4,9 @@ import android.graphics.Paint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +28,12 @@ fun HomeScreen() {
             Text(
                 text = "Home View Test"
             )
+            ElevatedButton(
+                onClick = {println("Button was pressed")}
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null)
+                Text("New Check")
+            }
         }
     }
 }
