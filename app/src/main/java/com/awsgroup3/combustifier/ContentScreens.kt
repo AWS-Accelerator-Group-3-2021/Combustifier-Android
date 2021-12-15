@@ -17,22 +17,11 @@ fun HomeScreen() {
     CombustifierTheme {
         Scaffold(
             topBar = { TopAppBar(pageName = "Home") },
-            content = {},
-            floatingActionButtonPosition = FabPosition.End,
-            floatingActionButton = {
-                ElevatedButton(
-                    modifier = Modifier
-                        .padding(32.dp,32.dp,0.dp,80.dp)
-                        .wrapContentWidth(),
-                    onClick = { println("Button was pressed") }
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = null)
-                    Text("New Check")
-                }
-            }
+            content = {}
         )
     }
 }
+
 
 
 @ExperimentalMaterial3Api

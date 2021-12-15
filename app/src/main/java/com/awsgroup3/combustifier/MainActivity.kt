@@ -63,7 +63,7 @@ fun TopAppBar(pageName: String) {
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp, 48.dp,24.dp,24.dp)
+                    .padding(24.dp, 48.dp, 24.dp, 24.dp)
                 ,
                 text = pageName,
                 fontFamily = Typography.titleLarge.fontFamily,
@@ -88,7 +88,26 @@ fun Navigation(navController: NavHostController) {
 }
 
 @Composable
+fun NewCheckButton() {
+    ExtendedFloatingActionButton(
+        text = { /*TODO*/ },
+        onClick = {
+            navController.navigate("Camera") {
+                navController.graph.startDestinationRoute?.let { route ->
+                    popUpTo(route) {
+                        saveState = true
+                    }
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    )
+}
+
+@Composable
 fun BottomNavigationBar(navController: NavController) {
+    NewCheckButton()
     NavigationBar (){
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
