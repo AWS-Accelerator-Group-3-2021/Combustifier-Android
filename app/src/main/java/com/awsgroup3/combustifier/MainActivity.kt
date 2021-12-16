@@ -3,21 +3,21 @@ package com.awsgroup3.combustifier
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -47,11 +47,51 @@ class MainActivity : ComponentActivity() {
 @ExperimentalMaterial3Api
 @Composable
 fun MainScreen() {
+    val items = listOf(
+        Screen.Home,
+        Screen.Measurement,
+    )
     val navController = rememberNavController()
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
-    ) {
-        Navigation(navController)
+        bottomBar = {
+            NavigationBar() {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+                items.forEach { screen ->
+                    NavigationBarItem(
+                        icon = { if (stringResource(screen.resourceId) == "home") {
+                            Icon(Icons.Filled.Home, contentDescription = null)
+                        } else {
+                            Icon(painterResource(id = R.drawable.baseline_straighten_24), contentDescription = null)
+                        }
+                                                             },
+                        label = { Text(stringResource(screen.resourceId)) },
+                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                        onClick = {
+                            navController.navigate(screen.route) {
+                                // Pop up to the start destination of the graph to
+                                // avoid building up a large stack of destinations
+                                // on the back stack as users select items
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                // Avoid multiple copies of the same destination when
+                                // reselecting the same item
+                                launchSingleTop = true
+                                // Restore state when reselecting a previously selected item
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        NavHost(navController, startDestination = Screen.Home.route, Modifier.padding(innerPadding)) {
+            composable(Screen.Home.route) { HomeScreen(navController) }
+            composable(Screen.Measurement.route) { MeasurementScreen(navController) }
+            composable(Screen.Camera.route) { CameraScreen(navController) }
+        }
     }
 }
 
@@ -74,59 +114,58 @@ fun TopAppBar(pageName: String) {
     )
 }
 
-@ExperimentalMaterial3Api
-@Composable
-fun Navigation(navController: NavHostController) {
-    NavHost(navController, startDestination = NavigationItem.Home.route) {
-        composable(NavigationItem.Home.route) {
-            HomeScreen()
-        }
-        composable(NavigationItem.Measurement.route) {
-            MeasurementScreen()
-        }
-    }
-}
+
 
 @Composable
-fun NewCheckButton() {
+fun NewCheckButton(navController: NavController) {
     ExtendedFloatingActionButton(
-        text = { /*TODO*/ },
+        text = { Text("New Check")},
+        icon = {Icon(Icons.Filled.AddCircle, contentDescription = null)},
         onClick = {
-            navController.navigate("Camera") {
-                navController.graph.startDestinationRoute?.let { route ->
-                    popUpTo(route) {
-                        saveState = true
-                    }
+            navController.navigate("camera") {
+                // Pop up to the start destination of the graph to
+                // avoid building up a large stack of destinations
+                // on the back stack as users select items
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
                 }
+                // Avoid multiple copies of the same destination when
+                // reselecting the same item
                 launchSingleTop = true
+                // Restore state when reselecting a previously selected item
                 restoreState = true
             }
         }
     )
 }
 
-@Composable
-fun BottomNavigationBar(navController: NavController) {
-    NewCheckButton()
-    NavigationBar (){
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
-        //Home
+
+
+/*fun BottomNavigationBar() {
+    val navController = rememberNavController()
+    var selectedIndex by remember { mutableStateOf(0) }
+    NavigationBar () {
         NavigationBarItem(
+            enabled = true,
             icon = { Icon(Icons.Filled.Home, contentDescription = null) },
             label = { Text("Home") },
-            selected = currentRoute == "Home",
             onClick = {
-                navController.navigate("Home") {
-                    navController.graph.startDestinationRoute?.let { route ->
-                        popUpTo(route) {
-                            saveState = true
-                        }
+                navController.navigate("home") {
+                    // Pop up to the start destination of the graph to
+                    // avoid building up a large stack of destinations
+                    // on the back stack as users select items
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
                     }
+                    // Avoid multiple copies of the same destination when
+                    // reselecting the same item
                     launchSingleTop = true
+                    // Restore state when reselecting a previously selected item
                     restoreState = true
                 }
-            }
+                selectedIndex = 0
+            },
+            selected = selectedIndex == 0
         )
         //Measurement
         NavigationBarItem(
@@ -136,28 +175,25 @@ fun BottomNavigationBar(navController: NavController) {
                     contentDescription = null
                 )
             },
+            enabled = true,
             label = { Text("Measurement") },
-            selected = currentRoute == "Measurement",
-            onClick = {
-                navController.navigate("Measurement") {
-                    navController.graph.startDestinationRoute?.let { route ->
-                        popUpTo(route) {
-                            saveState = true
-                        }
-                    }
-                    launchSingleTop = true
-                    restoreState = true
+            onClick = {navController.navigate("measurement") {
+                // Pop up to the start destination of the graph to
+                // avoid building up a large stack of destinations
+                // on the back stack as users select items
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
                 }
+                // Avoid multiple copies of the same destination when
+                // reselecting the same item
+                launchSingleTop = true
+                // Restore state when reselecting a previously selected item
+                restoreState = true
             }
+                selectedIndex = 1
+            },
+            selected = selectedIndex == 1
         )
     }
 }
-
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    CombustifierTheme {
-        TopAppBar("Hello Preview")
-    }
-}
+*/

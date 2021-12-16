@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Combustifier</string>
+    <string name="icn_camera_view_camera_shutter_content_description">Camera Shutter</string>
+    <string name="icn_camera_view_switch_camera_content_description">Flip</string>
+    <string name="home">home</string>
+    <string name="measurement">measurement</string>
+    <string name="camera">camera</string>
 </resources>

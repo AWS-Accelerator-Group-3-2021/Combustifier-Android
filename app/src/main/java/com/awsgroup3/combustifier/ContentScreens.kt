@@ -9,42 +9,45 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 
 @ExperimentalMaterial3Api
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     CombustifierTheme {
         Scaffold(
             topBar = { TopAppBar(pageName = "Home") },
+            bottomBar = {
+                NewCheckButton(navController)
+            },
             content = {}
         )
     }
 }
 
+@Composable
+fun CameraScreen(navController: NavController) {
+    CombustifierTheme() {
+        Text("Hello!")
+    }
+}
 
 
 @ExperimentalMaterial3Api
 @Composable
-fun MeasurementScreen() {
+fun MeasurementScreen(navController: NavController) {
     CombustifierTheme {
         Scaffold(
             topBar = { TopAppBar(pageName = "Measurement") },
-            content = {}
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize(Alignment.Center)
-        ) {
-            Text(
-                text = "Measurement View Test"
-            )
-        }
+            content = {
+                Text(
+                    text = "Measurement View Test"
+                )
+            })
     }
 }
 
 
-@Composable
-fun CameraScreen() {
-}
+
+
