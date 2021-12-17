@@ -18,9 +18,13 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -28,7 +32,10 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -150,25 +157,19 @@ fun TopAppBar(pageName: String) {
 
 @Composable
 fun NewCheckButton(navController: NavController) {
+
+        val result = remember { mutableStateOf<Bitmap?>(null) }
+        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
+            result.value = it}
     ExtendedFloatingActionButton(
         modifier = Modifier
             .padding(16.dp),
         text = { Text("New Check") },
         icon = { Icon(Icons.Filled.AddCircle, contentDescription = null) },
         onClick = {
-            navController.navigate("camera") {
-                // Pop up to the start destination of the graph to
-                // avoid building up a large stack of destinations
-                // on the back stack as users select items
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
-                }
-                // Avoid multiple copies of the same destination when
-                // reselecting the same item
-                launchSingleTop = true
-                // Restore state when reselecting a previously selected item
-                restoreState = true
-            }
+
+            launcher.launch()
+
         }
     )
 }
