@@ -63,27 +63,3 @@ private fun Rationale(
     )
 }
 
-
-@Composable
-fun CameraPermission(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    Permission(
-        permission = android.Manifest.permission.CAMERA,
-        rationale = "In order to proceed, permissions to access the camera is needed.",
-        permissionNotAvailableContent = {
-            Column(modifier) {
-                Text("Unable to Request for permission")
-                Spacer(modifier = Modifier.height(8.dp))
-                ElevatedButton(onClick = {
-                    context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = android.net.Uri.fromParts("package", context.packageName, null)
-                    })
-                }) {
-                    Text("Open Settings")
-                }
-            }
-        }
-    ) {
-        Text("Permission granted")
-    }
-}
