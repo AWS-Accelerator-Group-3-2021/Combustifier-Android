@@ -1,30 +1,17 @@
 package com.awsgroup3.combustifier
 
-import android.Manifest.permission.CAMERA
-import android.Manifest.permission.READ_EXTERNAL_STORAGE
-import android.app.Activity
-import android.content.ActivityNotFoundException
-import android.content.ContentValues
-import android.content.Intent
-import android.content.pm.PackageManager
+import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.icu.text.SimpleDateFormat
-import android.net.Uri
+import android.icu.text.DateFormat.getDateTimeInstance
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.camera.core.impl.utils.ContextUtil.getApplicationContext
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -35,31 +22,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.startActivity
-import androidx.core.app.ActivityCompat.startActivityForResult
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
-import androidx.core.content.FileProvider
-import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
+import coil.annotation.ExperimentalCoilApi
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import com.awsgroup3.combustifier.ui.theme.Typography
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
-import java.nio.file.Files.createFile
+
+import java.text.SimpleDateFormat
 import java.util.*
+
 
 
 class MainActivity : ComponentActivity() {
@@ -132,7 +113,6 @@ fun MainScreen() {
         ) {
             composable(Screen.Home.route) { HomeScreen(navController) }
             composable(Screen.Measurement.route) { MeasurementScreen(navController) }
-            composable(Screen.Camera.route) { CameraScreen(navController) }
         }
     }
 }
@@ -156,11 +136,19 @@ fun TopAppBar(pageName: String) {
 
 
 @Composable
-fun NewCheckButton(navController: NavController) {
-
-        val result = remember { mutableStateOf<Bitmap?>(null) }
-        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
-            result.value = it}
+@OptIn(
+    ExperimentalCoilApi::class,
+    ExperimentalPermissionsApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class
+)
+fun NewCheckButton() {
+    val datetime = getDateTimeInstance()
+    val result = remember { mutableStateOf<Bitmap?>(null) }
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicturePreview(
+        )
+    ) {
+        result.value = it
+    }
     ExtendedFloatingActionButton(
         modifier = Modifier
             .padding(16.dp),
@@ -172,5 +160,10 @@ fun NewCheckButton(navController: NavController) {
 
         }
     )
-}
+    result.value?.let { image ->
+        val root = Environment.getExternalStorageDirectory().absolutePath
+        val imgFile = File(root, "$datetime;_combustifier.jpg")
+        image.compress(Bitmap.CompressFormat.JPEG, 90, FileOutputStream(imgFile))
 
+    }
+}

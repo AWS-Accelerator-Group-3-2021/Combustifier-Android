@@ -5,4 +5,5 @@
     <string name="home">home</string>
     <string name="measurement">measurement</string>
     <string name="camera">camera</string>
+    <string name="aftercamerascreen">aftercamerascreen</string>
 </resources>
