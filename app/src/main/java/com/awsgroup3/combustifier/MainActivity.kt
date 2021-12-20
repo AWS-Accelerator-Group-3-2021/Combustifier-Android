@@ -1,5 +1,6 @@
 package com.awsgroup3.combustifier
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.icu.text.DateFormat.getDateTimeInstance
 import android.os.Bundle
@@ -23,11 +24,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -193,6 +197,7 @@ fun TopAppBar(pageName: String) {
     ExperimentalPermissionsApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class
 )
 fun NewCheckButton() {
+    val context = LocalContext.current
     val datetime = getDateTimeInstance()
     val result = remember { mutableStateOf<Bitmap?>(null) }
     val launcher = rememberLauncherForActivityResult(
@@ -213,9 +218,29 @@ fun NewCheckButton() {
         }
     )
     result.value?.let { image ->
-        val root = Environment.getExternalStorageDirectory().absolutePath
-        val imgFile = File(root, "$datetime;_combustifier.jpg")
-        image.compress(Bitmap.CompressFormat.JPEG, 90, FileOutputStream(imgFile))
-
+        // create new navigation to AfterCameraScreen()
+        val file = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+            "Combustifier"
+        )
+        if (!file.exists()) {
+            file.mkdirs()
+        }
+        val fileName = "Combustifier_1.jpg"
+        val out = FileOutputStream(File(file, fileName))
+        image.compress(Bitmap.CompressFormat.JPEG, 100, out)
+        out.flush()
+        out.close()
+        val contentUri = FileProvider.getUriForFile(
+            context,
+            "com.awsgroup3.combustifier.provider",
+            file
+        )
+        val intent = Intent(context, SendImageActivity::class.java)
+        intent.putExtra("imageUri", contentUri.toString())
+        intent.putExtra("imageName", fileName)
+        intent.putExtra("imageBitmap", image)
+        startActivity(context, intent, null)
+        
     }
 }

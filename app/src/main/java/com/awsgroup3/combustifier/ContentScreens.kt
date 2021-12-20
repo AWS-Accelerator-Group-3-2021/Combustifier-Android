@@ -32,26 +32,7 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
-@OptIn(ExperimentalCoilApi::class,
-    com.google.accompanist.permissions.ExperimentalPermissionsApi::class
-)
-@Composable
-fun CameraScreen(navController: NavController) {
 
-    val result = remember { mutableStateOf<Bitmap?>(null) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
-        result.value = it
-    }
-
-    ElevatedButton(onClick = { launcher.launch() }) {
-        Text(text = "Take a picture")
-    }
-
-    result.value?.let { image ->
-        AfterCameraScreen(image)
-    }
-
-}
 
 
 
