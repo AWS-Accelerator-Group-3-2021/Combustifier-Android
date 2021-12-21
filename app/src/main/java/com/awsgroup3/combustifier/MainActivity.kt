@@ -221,6 +221,7 @@ fun NewCheckButton() {
         val intent = Intent(context, SendImageActivity::class.java)
         intent.putExtra("imageBitmap", image)
         startActivity(context, intent, null)
+
         
     }
 }
