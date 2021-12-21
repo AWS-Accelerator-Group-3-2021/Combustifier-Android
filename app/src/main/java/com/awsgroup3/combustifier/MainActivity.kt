@@ -244,7 +244,16 @@ fun NewCheckButton() {
         val intent = Intent(context, SendImageActivity::class.java)
         intent.putExtra("imageBitmap", image)
         startActivity(context, intent, null)
-
+        // save image to gallery
+        val f = createImageFile()
+        val os = FileOutputStream(f)
+        image.compress(Bitmap.CompressFormat.JPEG, 100, os)
+        os.flush()
+        os.close()
+        val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+        val contentUri = Uri.fromFile(f)
+        mediaScanIntent.data = contentUri
+        context.sendBroadcast(mediaScanIntent)
         
     }
 }
