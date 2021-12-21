@@ -3,8 +3,11 @@ package com.awsgroup3.combustifier
 import android.content.Intent
 import android.graphics.Bitmap
 import android.icu.text.DateFormat.getDateTimeInstance
+import android.icu.text.SimpleDateFormat
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -46,6 +49,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
+import java.util.*
 
 
 class MainActivity : ComponentActivity() {
@@ -217,6 +222,24 @@ fun NewCheckButton() {
 
         }
     )
+
+    lateinit var currentPhotoPath: String
+
+    @Throws(IOException::class)
+    fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "combustifier_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
+    }
+
     result.value?.let { image ->
         val intent = Intent(context, SendImageActivity::class.java)
         intent.putExtra("imageBitmap", image)
@@ -225,3 +248,4 @@ fun NewCheckButton() {
         
     }
 }
+
