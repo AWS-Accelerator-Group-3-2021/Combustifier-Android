@@ -42,15 +42,7 @@ class SendImageActivity : ComponentActivity(){
     @ExperimentalMaterial3Api
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val imageUri = intent.getStringExtra("imageUri")
-        val imageFile = intent.getStringExtra("imageFile")
         val imageBitmap = intent.getParcelableExtra<Bitmap>("imageBitmap")
-            if (imageFile != null) {
-                Log.d("aftercamerascreen",imageFile)
-                if (imageUri != null) {
-                    Log.d("aftercamerascreen",imageUri)
-                }
-            }
         setContent {
             CombustifierTheme {
                 // A surface container using the 'background' color from the theme

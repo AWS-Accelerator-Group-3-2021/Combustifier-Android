@@ -218,27 +218,7 @@ fun NewCheckButton() {
         }
     )
     result.value?.let { image ->
-        // create new navigation to AfterCameraScreen()
-        val file = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-            "Combustifier"
-        )
-        if (!file.exists()) {
-            file.mkdirs()
-        }
-        val fileName = "Combustifier_1.jpg"
-        val out = FileOutputStream(File(file, fileName))
-        image.compress(Bitmap.CompressFormat.JPEG, 100, out)
-        out.flush()
-        out.close()
-        val contentUri = FileProvider.getUriForFile(
-            context,
-            "com.awsgroup3.combustifier.provider",
-            file
-        )
         val intent = Intent(context, SendImageActivity::class.java)
-        intent.putExtra("imageUri", contentUri.toString())
-        intent.putExtra("imageName", fileName)
         intent.putExtra("imageBitmap", image)
         startActivity(context, intent, null)
         
