@@ -207,8 +207,9 @@ fun NewCheckButton() {
     val result = remember { mutableStateOf<Bitmap?>(null) }
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicturePreview(
+
         )
-    ) {
+    ){
         result.value = it
     }
     ExtendedFloatingActionButton(
@@ -241,10 +242,6 @@ fun NewCheckButton() {
     }
 
     result.value?.let { image ->
-        val intent = Intent(context, SendImageActivity::class.java)
-        intent.putExtra("imageBitmap", image)
-        startActivity(context, intent, null)
-        // save image to gallery
         val f = createImageFile()
         val os = FileOutputStream(f)
         image.compress(Bitmap.CompressFormat.JPEG, 100, os)
@@ -254,6 +251,9 @@ fun NewCheckButton() {
         val contentUri = Uri.fromFile(f)
         mediaScanIntent.data = contentUri
         context.sendBroadcast(mediaScanIntent)
+        val intent = Intent(context, SendImageActivity::class.java)
+        intent.putExtra("imageBitmap", image)
+        startActivity(context, intent, null)
         
     }
 }
