@@ -40,38 +40,12 @@ fun HomeScreen(navController: NavController) {
 }
 
 
-class ArcoreMeasurement : AppCompatActivity() {
-    private val TAG = "ArcoreMeasurement"
-    private val buttonArrayList = ArrayList<String>()
-    private lateinit var toMeasurement: Button
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_arcore_measurement)
-
-        val buttonArray = resources
-            .getStringArray(R.array.arcore_measurement_buttons)
-
-        buttonArray.map{it->
-            buttonArrayList.add(it)
-        }
-        toMeasurement = findViewById(R.id.to_measurement)
-        toMeasurement.text = buttonArrayList[0]
-        toMeasurement.setOnClickListener(object: View.OnClickListener {
-            override fun onClick(v: View?) {
-                val intent = Intent(application, Measurement::class.java)
-                startActivity(intent)
-            }
-        })
-    }
-}
-
 
 @ExperimentalMaterial3Api
 @Composable
 fun MeasurementScreen(navController: NavController) {
     CombustifierTheme {
-        val intent = Intent(LocalContext.current, ArcoreMeasurement::class.java)
+        val intent = Intent(LocalContext.current, Measurement::class.java)
         ContextCompat.startActivity(LocalContext.current, intent, null)
     }
 }
