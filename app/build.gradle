@@ -76,6 +76,7 @@ dependencies {
 
     // Testing Constraint Layout
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0-rc02"
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
 
     //ARCore
     implementation 'com.google.ar:core:1.29.0'
