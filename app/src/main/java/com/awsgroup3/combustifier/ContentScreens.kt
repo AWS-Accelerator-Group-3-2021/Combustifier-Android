@@ -47,7 +47,6 @@ fun MeasurementScreen(navController: NavController) {
     CombustifierTheme {
         val intent = Intent(LocalContext.current, Measurement::class.java)
         ContextCompat.startActivity(LocalContext.current, intent, null)
-
     }
 }
 

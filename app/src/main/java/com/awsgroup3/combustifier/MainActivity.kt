@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -254,7 +253,6 @@ fun NewCheckButton() {
         context.sendBroadcast(mediaScanIntent)
         val intent = Intent(context, SendImageActivity::class.java)
         intent.putExtra("imageBitmap", image)
-        Log.d("contenturi", contentUri.toString())
         startActivity(context, intent, null)
         
     }

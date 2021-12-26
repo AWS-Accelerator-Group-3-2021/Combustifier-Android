@@ -1,7 +1,10 @@
 package com.awsgroup3.combustifier
 
+import android.R.attr.bitmap
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -16,11 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import java.util.*
 
 
 @OptIn(ExperimentalCoilApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
@@ -42,12 +47,6 @@ fun AfterCameraScreen(image: Bitmap?) {
 }
 
 class SendImageActivity : ComponentActivity() {
-    private val _awsResponse = MutableLiveData("")
-    val awsResponse: LiveData<String> = _awsResponse
-
-    fun onResponseChange(new: String) {
-        _awsResponse.value = new
-    }
     @ExperimentalMaterial3Api
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
