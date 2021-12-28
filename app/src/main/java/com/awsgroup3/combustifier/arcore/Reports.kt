@@ -1,30 +1,28 @@
 package com.awsgroup3.combustifier.arcore
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import java.util.*
 
 @Composable
 fun AfterMeasuringScreen() {
-    val name = remember {
-        mutableStateOf(TextFieldValue())
-    }
-    val address = remember {
-        mutableStateOf(TextFieldValue())
-    }
+    var name by remember { mutableStateOf("")}
+    var address by remember { mutableStateOf("")}
     val id = UUID.randomUUID().toString()
     val openDialog = remember { mutableStateOf(true) }
-
+    val measurementResultForReports = 69.0f
     if (openDialog.value) {
         AlertDialog(
             icon = {Icon(Icons.Filled.Warning, contentDescription = null)},
@@ -38,7 +36,24 @@ fun AfterMeasuringScreen() {
                 Text(text = "Submit a Report")
             },
             text = {
-                Text(text = "Found someone with less than 1.2m of space available?")
+                Column() {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text("your name") },
+                    )
+                    OutlinedTextField(
+                        value = address,
+                        onValueChange = { address = it },
+                        label = { Text("address of offender") },
+                    )
+                    OutlinedTextField(
+                        value = measurementResultForReports.toString(),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("measurement result") },
+                    )
+                }
             },
             confirmButton = {
                 TextButton(
