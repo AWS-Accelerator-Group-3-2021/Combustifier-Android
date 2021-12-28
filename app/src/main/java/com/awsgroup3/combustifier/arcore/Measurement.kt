@@ -15,6 +15,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.*
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import com.google.ar.core.*
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.FrameTime
@@ -32,9 +33,10 @@ import kotlin.math.sqrt
 
 class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
     private val MIN_OPENGL_VERSION = 3.0
-    private val TAG: String = Measurement::class.java.getSimpleName()
+    private val TAG: String = Measurement::class.java.simpleName
 
     private var arFragment: ArFragment? = null
+
 
     private var distanceModeTextView: TextView? = null
     private lateinit var pointTextView: TextView
@@ -53,12 +55,8 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
     private lateinit var arrow10UpRenderable: Renderable
     private lateinit var arrow10DownRenderable: Renderable
 
-    private lateinit var multipleDistanceTableLayout: TableLayout
-
     private var cubeRenderable: ModelRenderable? = null
     private var distanceCardViewRenderable: ViewRenderable? = null
-
-    private lateinit var distanceModeSpinner: Spinner
     private val distanceModeArrayList = ArrayList<String>()
     private var distanceMode: String = ""
 
@@ -74,6 +72,8 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
 
     private lateinit var clearButton: Button
 
+    var measurementResultForReports: Float = 0.0f
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (!checkIsSupportedDeviceOrFinish(this)) {
@@ -87,12 +87,9 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             distanceModeArrayList.add(it)
         }
         arFragment = supportFragmentManager.findFragmentById(R.id.sceneform_fragment) as ArFragment?
-        distanceModeTextView = findViewById(R.id.distance_view)
-        multipleDistanceTableLayout = findViewById(R.id.multiple_distance_table)
 
         initCM = 0.0.toString()
 
-        configureSpinner()
         initArrowView()
         initRenderable()
         clearButton()
@@ -101,63 +98,25 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             if (cubeRenderable == null || distanceCardViewRenderable == null) return@setOnTapArPlaneListener
             // Creating Anchor.
             when (distanceMode){
-                distanceModeArrayList[0] -> {
-                    clearAllAnchors()
-                    placeAnchor(hitResult, distanceCardViewRenderable!!)
-                }
                 distanceModeArrayList[1] -> {
                     tapDistanceOf2Points(hitResult)
                 }
+                distanceModeArrayList[0] -> {
+                    tapDistanceOf2Points(hitResult)
+                }
                 distanceModeArrayList[2] -> {
-                    tapDistanceOfMultiplePoints(hitResult)
+                    tapDistanceOf2Points(hitResult)
                 }
                 distanceModeArrayList[3] -> {
-                    tapDistanceFromGround(hitResult)
+                    tapDistanceOf2Points(hitResult)
                 }
                 else -> {
-                    clearAllAnchors()
-                    placeAnchor(hitResult, distanceCardViewRenderable!!)
+                    tapDistanceOf2Points(hitResult)
                 }
             }
         }
     }
 
-    private fun initDistanceTable(){
-        for (i in 0 until Constants.maxNumMultiplePoints+1){
-            val tableRow = TableRow(this)
-            multipleDistanceTableLayout.addView(tableRow,
-                multipleDistanceTableLayout.width,
-                Constants.multipleDistanceTableHeight / (Constants.maxNumMultiplePoints + 1))
-            for (j in 0 until Constants.maxNumMultiplePoints+1){
-                val textView = TextView(this)
-                textView.setTextColor(Color.WHITE)
-                if (i==0){
-                    if (j==0){
-                        textView.setText("cm")
-                    }
-                    else{
-                        textView.setText((j-1).toString())
-                    }
-                }
-                else{
-                    if (j==0){
-                        textView.setText((i-1).toString())
-                    }
-                    else if(i==j){
-                        textView.setText("-")
-                        multipleDistances[i-1][j-1] = textView
-                    }
-                    else{
-                        textView.setText(initCM)
-                        multipleDistances[i-1][j-1] = textView
-                    }
-                }
-                tableRow.addView(textView,
-                    tableRow.layoutParams.width / (Constants.maxNumMultiplePoints + 1),
-                    tableRow.layoutParams.height)
-            }
-        }
-    }
 
     private fun initArrowView(){
         arrow1UpLinearLayout = LinearLayout(this)
@@ -303,46 +262,7 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             }
     }
 
-    private fun configureSpinner(){
-        distanceMode = distanceModeArrayList[0]
-        distanceModeSpinner = findViewById(R.id.distance_mode_spinner)
-        val distanceModeAdapter = ArrayAdapter(
-            applicationContext,
-            android.R.layout.simple_spinner_item,
-            distanceModeArrayList
-        )
-        distanceModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        distanceModeSpinner.adapter = distanceModeAdapter
-        distanceModeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onItemSelected(parent: AdapterView<*>?,
-                                        view: View?,
-                                        position: Int,
-                                        id: Long) {
-                val spinnerParent = parent as Spinner
-                distanceMode = spinnerParent.selectedItem as String
-                clearAllAnchors()
-                setMode()
-                toastMode()
-                if (distanceMode == distanceModeArrayList[2]){
-                    val layoutParams = multipleDistanceTableLayout.layoutParams
-                    layoutParams.height = Constants.multipleDistanceTableHeight
-                    multipleDistanceTableLayout.layoutParams = layoutParams
-                    initDistanceTable()
-                }
-                else{
-                    val layoutParams = multipleDistanceTableLayout.layoutParams
-                    layoutParams.height = 0
-                    multipleDistanceTableLayout.layoutParams = layoutParams
-                }
-                Log.i(TAG, "Selected arcore focus on ${distanceMode}")
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                clearAllAnchors()
-                setMode()
-                toastMode()
-            }
-        }
-    }
+
 
     private fun setMode(){
         distanceModeTextView!!.text = distanceMode
@@ -595,42 +515,23 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
     override fun onUpdate(frameTime: FrameTime) {
         when(distanceMode) {
             distanceModeArrayList[0] -> {
-                measureDistanceFromCamera()
+                measureDistanceOf2Points()
             }
             distanceModeArrayList[1] -> {
                 measureDistanceOf2Points()
             }
             distanceModeArrayList[2] -> {
-                measureMultipleDistances()
+                measureDistanceOf2Points()
             }
             distanceModeArrayList[3] -> {
-                measureDistanceFromGround()
+                measureDistanceOf2Points()
             }
             else -> {
-                measureDistanceFromCamera()
+                measureDistanceOf2Points()
             }
         }
     }
 
-    private fun measureDistanceFromGround(){
-        if (fromGroundNodes.size == 0) return
-        for (node in fromGroundNodes){
-            val textView = (distanceCardViewRenderable!!.view as LinearLayout)
-                .findViewById<TextView>(R.id.distanceCard)
-            val distanceCM = changeUnit(node[0].worldPosition.y + 1.0f, "cm")
-            textView.text = "%.0f".format(distanceCM) + " cm"
-        }
-    }
-
-    private fun measureDistanceFromCamera(){
-        val frame = arFragment!!.arSceneView.arFrame
-        if (placedAnchorNodes.size >= 1) {
-            val distanceMeter = calculateDistance(
-                placedAnchorNodes[0].worldPosition,
-                frame!!.camera.pose)
-            measureDistanceOf2Points(distanceMeter)
-        }
-    }
 
     private fun measureDistanceOf2Points(){
         if (placedAnchorNodes.size == 2) {
@@ -647,23 +548,10 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             .findViewById<TextView>(R.id.distanceCard)
         textView.text = distanceTextCM
         Log.d(TAG, "distance: ${distanceTextCM}")
+        measurementResultForReports = distanceMeter
+        Log.d("measurementresult", measurementResultForReports.toString())
     }
 
-    private fun measureMultipleDistances(){
-        if (placedAnchorNodes.size > 1){
-            for (i in 0 until placedAnchorNodes.size){
-                for (j in i+1 until placedAnchorNodes.size){
-                    val distanceMeter = calculateDistance(
-                        placedAnchorNodes[i].worldPosition,
-                        placedAnchorNodes[j].worldPosition)
-                    val distanceCM = changeUnit(distanceMeter, "cm")
-                    val distanceCMFloor = "%.2f".format(distanceCM)
-                    multipleDistances[i][j]!!.setText(distanceCMFloor)
-                    multipleDistances[j][i]!!.setText(distanceCMFloor)
-                }
-            }
-        }
-    }
 
     private fun makeDistanceTextWithCM(distanceMeter: Float): String{
         val distanceCM = changeUnit(distanceMeter, "cm")
