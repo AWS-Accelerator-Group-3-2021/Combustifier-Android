@@ -12,20 +12,32 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/reportButtonCompose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible">
+
+        </androidx.compose.ui.platform.ComposeView>
+
         <fragment
             android:id="@+id/sceneform_fragment"
             android:name="com.google.ar.sceneform.ux.ArFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="9"/>
+            android:layout_weight="9" />
 
         <androidx.compose.ui.platform.ComposeView
             android:id="@+id/clearButtonCompose"
-            android:layout_width="match_parent"
+            android:layout_width="317dp"
             android:layout_height="wrap_content"
-            android:translationY="-50dp">
+            android:translationY="-50dp"
+            android:visibility="visible">
 
         </androidx.compose.ui.platform.ComposeView>
+
+
 
     </LinearLayout>
 

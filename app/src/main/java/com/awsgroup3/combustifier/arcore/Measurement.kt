@@ -16,6 +16,7 @@ import android.view.View
 import android.widget.*
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
@@ -109,21 +110,19 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             // Creating Anchor.
             when (distanceMode){
                 distanceModeArrayList[0] -> {
-                    clearAllAnchors()
-                    placeAnchor(hitResult, distanceCardViewRenderable!!)
+                    tapDistanceOf2Points(hitResult)
                 }
                 distanceModeArrayList[1] -> {
                     tapDistanceOf2Points(hitResult)
                 }
                 distanceModeArrayList[2] -> {
-                    tapDistanceOfMultiplePoints(hitResult)
+                    tapDistanceOf2Points(hitResult)
                 }
                 distanceModeArrayList[3] -> {
-                    tapDistanceFromGround(hitResult)
+                    tapDistanceOf2Points(hitResult)
                 }
                 else -> {
-                    clearAllAnchors()
-                    placeAnchor(hitResult, distanceCardViewRenderable!!)
+                    tapDistanceOf2Points(hitResult)
                 }
             }
         }
@@ -518,19 +517,19 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
     override fun onUpdate(frameTime: FrameTime) {
         when(distanceMode) {
             distanceModeArrayList[0] -> {
-                measureDistanceFromCamera()
+                measureDistanceOf2Points()
             }
             distanceModeArrayList[1] -> {
                 measureDistanceOf2Points()
             }
             distanceModeArrayList[2] -> {
-                measureMultipleDistances()
+                measureDistanceOf2Points()
             }
             distanceModeArrayList[3] -> {
-                measureDistanceFromGround()
+                measureDistanceOf2Points()
             }
             else -> {
-                measureDistanceFromCamera()
+                measureDistanceOf2Points()
             }
         }
     }
@@ -565,11 +564,19 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
     private fun measureDistanceOf2Points(distanceMeter: Float){
+        val reportButtonCompose = findViewById<ComposeView>(R.id.reportButtonCompose)
         val distanceTextCM = makeDistanceTextWithCM(distanceMeter)
         val textView = (distanceCardViewRenderable!!.view as LinearLayout)
             .findViewById<TextView>(R.id.distanceCard)
         textView.text = distanceTextCM
         Log.d(TAG, "distance: ${distanceTextCM}")
+        if (distanceMeter >= 120.0f) {
+            reportButtonCompose.setContent{
+                CombustifierTheme {
+                    NewReportButton()
+                }
+            }
+        }
     }
 
     private fun measureMultipleDistances(){
@@ -667,6 +674,15 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             onClick= {clearAllAnchors()}
         ){
             Text("Clear")
+        }
+    }
+
+    @Composable
+    private fun NewReportButton(){
+        FloatingActionButton(
+            onClick = {}
+        ) {
+            Text("Report")
         }
     }
 }
