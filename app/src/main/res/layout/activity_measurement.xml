@@ -19,12 +19,6 @@
             android:layout_height="0dp"
             android:layout_weight="9"/>
 
-        <TableLayout
-            android:id="@+id/multiple_distance_table"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.0"/>
-
         <androidx.compose.ui.platform.ComposeView
             android:id="@+id/clearButtonCompose"
             android:layout_width="match_parent"
@@ -32,18 +26,6 @@
             android:translationY="-50dp">
 
         </androidx.compose.ui.platform.ComposeView>
-
-        <Button
-            android:id="@+id/clearButton"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.5"
-            android:background="#18489B"
-            android:fontFamily="sans-serif-thin"
-            android:text="@string/clear"
-            android:textAlignment="center"
-            android:textColor="@android:color/white"
-            android:textSize="14sp" />
 
     </LinearLayout>
 

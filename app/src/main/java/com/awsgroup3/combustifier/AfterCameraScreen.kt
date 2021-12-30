@@ -2,6 +2,7 @@ package com.awsgroup3.combustifier
 
 import android.R.attr.bitmap
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -51,6 +52,7 @@ class SendImageActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val imageBitmap = intent.getParcelableExtra<Bitmap>("imageBitmap")
+        val imageUri = intent.getParcelableExtra<Uri>("Uri")
         setContent {
             CombustifierTheme {
                 // A surface container using the 'background' color from the theme

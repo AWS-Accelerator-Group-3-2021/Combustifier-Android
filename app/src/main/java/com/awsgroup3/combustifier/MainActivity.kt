@@ -253,6 +253,7 @@ fun NewCheckButton() {
         context.sendBroadcast(mediaScanIntent)
         val intent = Intent(context, SendImageActivity::class.java)
         intent.putExtra("imageBitmap", image)
+        intent.putExtra("imageUri", contentUri)
         startActivity(context, intent, null)
         
     }

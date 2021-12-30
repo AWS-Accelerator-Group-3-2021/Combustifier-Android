@@ -103,7 +103,6 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
 
         initArrowView()
         initRenderable()
-        clearButton()
 
         arFragment!!.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane?, motionEvent: MotionEvent? ->
             if (cubeRenderable == null || distanceCardViewRenderable == null) return@setOnTapArPlaneListener
@@ -280,14 +279,6 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         distanceModeTextView!!.text = distanceMode
     }
 
-    private fun clearButton(){
-        clearButton = findViewById(R.id.clearButton)
-        clearButton.setOnClickListener(object: View.OnClickListener {
-            override fun onClick(v: View?) {
-                clearAllAnchors()
-            }
-        })
-    }
 
     private fun clearAllAnchors(){
         placedAnchors.clear()
@@ -670,13 +661,12 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         }
         return true
     }
-}
-
-@Composable
-fun NewClearButton() {
-    ElevatedButton(
-        onClick= {}
-    ){
-       Text("Hi")
+    @Composable
+    private fun NewClearButton() {
+        ElevatedButton(
+            onClick= {clearAllAnchors()}
+        ){
+            Text("Clear")
+        }
     }
 }
