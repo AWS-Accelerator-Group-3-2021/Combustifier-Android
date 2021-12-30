@@ -15,6 +15,11 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.*
 import androidx.activity.ComponentActivity
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.ComposeView
+import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import com.google.ar.core.*
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.FrameTime
@@ -82,17 +87,20 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         }
 
         setContentView(R.layout.activity_measurement)
+        val clearButtonCompose = findViewById<ComposeView>(R.id.clearButtonCompose)
+        clearButtonCompose.setContent{
+            CombustifierTheme {
+                NewClearButton()
+            }
+        }
         val distanceModeArray = resources.getStringArray(R.array.distance_mode)
         distanceModeArray.map{it->
             distanceModeArrayList.add(it)
         }
         arFragment = supportFragmentManager.findFragmentById(R.id.sceneform_fragment) as ArFragment?
-        distanceModeTextView = findViewById(R.id.distance_view)
-        multipleDistanceTableLayout = findViewById(R.id.multiple_distance_table)
 
         initCM = 0.0.toString()
 
-        configureSpinner()
         initArrowView()
         initRenderable()
         clearButton()
@@ -122,42 +130,6 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         }
     }
 
-    private fun initDistanceTable(){
-        for (i in 0 until Constants.maxNumMultiplePoints+1){
-            val tableRow = TableRow(this)
-            multipleDistanceTableLayout.addView(tableRow,
-                multipleDistanceTableLayout.width,
-                Constants.multipleDistanceTableHeight / (Constants.maxNumMultiplePoints + 1))
-            for (j in 0 until Constants.maxNumMultiplePoints+1){
-                val textView = TextView(this)
-                textView.setTextColor(Color.WHITE)
-                if (i==0){
-                    if (j==0){
-                        textView.setText("cm")
-                    }
-                    else{
-                        textView.setText((j-1).toString())
-                    }
-                }
-                else{
-                    if (j==0){
-                        textView.setText((i-1).toString())
-                    }
-                    else if(i==j){
-                        textView.setText("-")
-                        multipleDistances[i-1][j-1] = textView
-                    }
-                    else{
-                        textView.setText(initCM)
-                        multipleDistances[i-1][j-1] = textView
-                    }
-                }
-                tableRow.addView(textView,
-                    tableRow.layoutParams.width / (Constants.maxNumMultiplePoints + 1),
-                    tableRow.layoutParams.height)
-            }
-        }
-    }
 
     private fun initArrowView(){
         arrow1UpLinearLayout = LinearLayout(this)
@@ -303,46 +275,6 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             }
     }
 
-    private fun configureSpinner(){
-        distanceMode = distanceModeArrayList[0]
-        distanceModeSpinner = findViewById(R.id.distance_mode_spinner)
-        val distanceModeAdapter = ArrayAdapter(
-            applicationContext,
-            android.R.layout.simple_spinner_item,
-            distanceModeArrayList
-        )
-        distanceModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        distanceModeSpinner.adapter = distanceModeAdapter
-        distanceModeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onItemSelected(parent: AdapterView<*>?,
-                                        view: View?,
-                                        position: Int,
-                                        id: Long) {
-                val spinnerParent = parent as Spinner
-                distanceMode = spinnerParent.selectedItem as String
-                clearAllAnchors()
-                setMode()
-                toastMode()
-                if (distanceMode == distanceModeArrayList[2]){
-                    val layoutParams = multipleDistanceTableLayout.layoutParams
-                    layoutParams.height = Constants.multipleDistanceTableHeight
-                    multipleDistanceTableLayout.layoutParams = layoutParams
-                    initDistanceTable()
-                }
-                else{
-                    val layoutParams = multipleDistanceTableLayout.layoutParams
-                    layoutParams.height = 0
-                    multipleDistanceTableLayout.layoutParams = layoutParams
-                }
-                Log.i(TAG, "Selected arcore focus on ${distanceMode}")
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                clearAllAnchors()
-                setMode()
-                toastMode()
-            }
-        }
-    }
 
     private fun setMode(){
         distanceModeTextView!!.text = distanceMode
@@ -737,5 +669,14 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             return false
         }
         return true
+    }
+}
+
+@Composable
+fun NewClearButton() {
+    ElevatedButton(
+        onClick= {}
+    ){
+       Text("Hi")
     }
 }
