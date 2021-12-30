@@ -36,7 +36,10 @@
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
-
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/clearButtonCompose"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
