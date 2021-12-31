@@ -7,38 +7,40 @@
     android:background="@color/colorPrimary"
     tools:context=".Measurement">
 
-    <LinearLayout
+    <fragment
+        android:id="@+id/sceneform_fragment"
+        android:name="com.google.ar.sceneform.ux.ArFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="0dp"
+        android:layout_weight="9"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/clearButtonCompose"
+        android:layout_width="142dp"
+        android:layout_height="39dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.937"></androidx.compose.ui.platform.ComposeView>
 
-        <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/reportButtonCompose"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="visible">
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/reportButtonCompose"
+        android:layout_width="92dp"
+        android:layout_height="83dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.903"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.047">
 
-        </androidx.compose.ui.platform.ComposeView>
-
-        <fragment
-            android:id="@+id/sceneform_fragment"
-            android:name="com.google.ar.sceneform.ux.ArFragment"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="9" />
-
-        <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/clearButtonCompose"
-            android:layout_width="317dp"
-            android:layout_height="wrap_content"
-            android:translationY="-50dp"
-            android:visibility="visible">
-
-        </androidx.compose.ui.platform.ComposeView>
-
-
-
-    </LinearLayout>
+    </androidx.compose.ui.platform.ComposeView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
