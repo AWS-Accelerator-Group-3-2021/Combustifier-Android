@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.tooling.preview.Preview
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import com.google.ar.core.Anchor
 import com.google.ar.core.HitResult
@@ -34,6 +33,11 @@ import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.*
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okio.IOException
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -604,8 +608,7 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                     NewReportButton(true, distanceMeter)
                 }
             }
-        }
-        else {
+        } else {
             reportButtonCompose.setContent {
                 CombustifierTheme {
                     NewReportButton(false, distanceMeter)
@@ -728,6 +731,7 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
     private fun NewReportButton(isVisible: Boolean, measurementValue: Float) {
         var name by remember { mutableStateOf("") }
         var address by remember { mutableStateOf("") }
+        var addinfo by remember { mutableStateOf("") }
         val openDialog = remember { mutableStateOf(false) }
         val deviceInfo = Build.MANUFACTURER + " " + Build.MODEL
         val reportUUID = UUID.randomUUID().toString()
@@ -755,24 +759,29 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                     Text(text = "Title")
                 },
                 text = {
-                Column() {
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text("your name") }
-                    )
-                    OutlinedTextField(
-                        value = address,
-                        onValueChange = { address = it },
-                        label = { Text("address to report") }
-                    )
-                    OutlinedTextField(
-                        value = measurementValue.toString(),
-                        onValueChange = {},
-                        label = { Text("measured value") },
-                        enabled = false
-                    )
-                }
+                    Column() {
+                        OutlinedTextField(
+                            value = name,
+                            onValueChange = { name = it },
+                            label = { Text("your name") }
+                        )
+                        OutlinedTextField(
+                            value = address,
+                            onValueChange = { address = it },
+                            label = { Text("address to report") }
+                        )
+                        OutlinedTextField(
+                            value = addinfo,
+                            onValueChange = { addinfo = it },
+                            label = { Text("additional info") }
+                        )
+                        OutlinedTextField(
+                            value = measurementValue.toString(),
+                            onValueChange = {},
+                            label = { Text("measured value") },
+                            enabled = false
+                        )
+                    }
                 },
                 confirmButton = {
                     TextButton(
@@ -781,6 +790,14 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                         }
                     ) {
                         Text("Confirm")
+                        sendReport(
+                            name,
+                            address,
+                            addinfo,
+                            measurementValue.toString(),
+                            reportUUID,
+                            deviceInfo
+                        )
                     }
                 },
                 dismissButton = {
@@ -795,11 +812,42 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             )
         }
     }
-    @Preview(showBackground = true)
-    @Composable
-    fun DefaultPreview() {
-        CombustifierTheme() {
-            NewReportButton(true, 6.9f)
-        }
+}
+
+private val client = OkHttpClient()
+fun sendReport(
+    name: String,
+    address: String,
+    addinfo: String,
+    measurementValue: String,
+    reportUUID: String,
+    deviceInfo: String
+) {
+    val request = Request.Builder()
+        .url("https://reports.drakonzai.com/newReport")
+        .header("Content-Type", "application/json")
+        .addHeader("ReportsAccessCode", "AWSGroup3-POCwej69")
+        .post(
+            """
+                {
+                "data": {
+                    "reporter_name": "$name",
+                    "address": "$address",
+                    "measurement": $measurementValue,
+                    "clientInfo": "$deviceInfo",
+                    "id": "$reportUUID",
+                    "add_info": "$addinfo",
+                    "datetime": "somethingsomething"
+                    }
+                }
+                """.trimIndent()
+                .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+        )
+        .build()
+
+    client.newCall(request).execute().use { response ->
+        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
     }
+
 }

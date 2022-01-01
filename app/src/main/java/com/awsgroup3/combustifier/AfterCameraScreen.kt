@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +32,7 @@ import java.util.*
 
 @OptIn(ExperimentalCoilApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun AfterCameraScreen(image: Bitmap?) {
+fun AfterCameraScreen(image: Bitmap?, response : String) {
     CombustifierTheme() {
         Column(
             Modifier.fillMaxSize(),
@@ -43,6 +44,20 @@ fun AfterCameraScreen(image: Bitmap?) {
                 contentDescription = null,
                 modifier = Modifier.size(340.dp)
             )
+            when (response) {
+                "sending" -> {
+                    Text("Uploading your image...")
+                }
+                "yes" -> {
+                    Text("Image uploaded successfully!")
+                }
+                "no" -> {
+                    Text("Image upload failed!")
+                }
+                else -> {
+                    Text("Error. Please retry")
+                }
+            }
         }
     }
 }
@@ -55,9 +70,8 @@ class SendImageActivity : ComponentActivity() {
         val imageUri = intent.getParcelableExtra<Uri>("Uri")
         setContent {
             CombustifierTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    AfterCameraScreen(imageBitmap)
+                    AfterCameraScreen(imageBitmap, response = "sending")
 
 
                 }
