@@ -13,12 +13,14 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.tooling.preview.Preview
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import com.google.ar.core.Anchor
 import com.google.ar.core.HitResult
@@ -753,9 +755,7 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                     Text(text = "Title")
                 },
                 text = {
-                    Text(
-                        "Quick Test on Reports Button"
-                    )
+                Column() {
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
@@ -772,6 +772,7 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                         label = { Text("measured value") },
                         enabled = false
                     )
+                }
                 },
                 confirmButton = {
                     TextButton(
@@ -794,5 +795,11 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             )
         }
     }
-
+    @Preview(showBackground = true)
+    @Composable
+    fun DefaultPreview() {
+        CombustifierTheme() {
+            NewReportButton(true, 6.9f)
+        }
+    }
 }
