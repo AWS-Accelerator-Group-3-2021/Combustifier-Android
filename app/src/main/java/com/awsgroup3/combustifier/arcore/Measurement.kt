@@ -6,18 +6,18 @@ import android.app.ActivityManager
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import com.google.ar.core.Anchor
@@ -599,14 +599,14 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         if (distanceMeter >= 1.2) {
             reportButtonCompose.setContent {
                 CombustifierTheme {
-                    NewReportButton(true)
+                    NewReportButton(true, distanceMeter)
                 }
             }
         }
         else {
             reportButtonCompose.setContent {
                 CombustifierTheme {
-                    NewReportButton(false)
+                    NewReportButton(false, distanceMeter)
                 }
             }
         }
@@ -723,8 +723,14 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
     @Composable
-    private fun NewReportButton(isVisible: Boolean) {
+    private fun NewReportButton(isVisible: Boolean, measurementValue: Float) {
+        var name by remember { mutableStateOf("") }
+        var address by remember { mutableStateOf("") }
         val openDialog = remember { mutableStateOf(false) }
+        val deviceInfo = Build.MANUFACTURER + " " + Build.MODEL
+        val reportUUID = UUID.randomUUID().toString()
+        Log.d("deviceInfo", deviceInfo)
+        Log.d("reportUUID", reportUUID)
         if (isVisible) {
             FloatingActionButton(
                 onClick = {
@@ -749,6 +755,22 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                 text = {
                     Text(
                         "Quick Test on Reports Button"
+                    )
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text("your name") }
+                    )
+                    OutlinedTextField(
+                        value = address,
+                        onValueChange = { address = it },
+                        label = { Text("address to report") }
+                    )
+                    OutlinedTextField(
+                        value = measurementValue.toString(),
+                        onValueChange = {},
+                        label = { Text("measured value") },
+                        enabled = false
                     )
                 },
                 confirmButton = {
