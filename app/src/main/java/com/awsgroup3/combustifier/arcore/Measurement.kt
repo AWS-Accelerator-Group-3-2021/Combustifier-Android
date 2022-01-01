@@ -20,6 +20,13 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.lifecycleScope
+import com.android.volley.Request
+import com.android.volley.Request.Method.POST
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import com.google.ar.core.Anchor
 import com.google.ar.core.HitResult
@@ -33,11 +40,10 @@ import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.*
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okio.IOException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -790,14 +796,14 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                         }
                     ) {
                         Text("Confirm")
-                        sendReport(
-                            name,
-                            address,
-                            addinfo,
-                            measurementValue.toString(),
-                            reportUUID,
-                            deviceInfo
-                        )
+                            sendReport(
+                                name,
+                                address,
+                                addinfo,
+                                measurementValue.toString(),
+                                reportUUID,
+                                deviceInfo
+                            )
                     }
                 },
                 dismissButton = {
@@ -812,23 +818,17 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             )
         }
     }
-}
-
-private val client = OkHttpClient()
-fun sendReport(
-    name: String,
-    address: String,
-    addinfo: String,
-    measurementValue: String,
-    reportUUID: String,
-    deviceInfo: String
-) {
-    val request = Request.Builder()
-        .url("https://reports.drakonzai.com/newReport")
-        .header("Content-Type", "application/json")
-        .addHeader("ReportsAccessCode", "AWSGroup3-POCwej69")
-        .post(
-            """
+    fun sendReports(
+        name: String,
+        address: String,
+        addinfo: String,
+        measurementValue: String,
+        reportUUID: String,
+        deviceInfo: String
+    ) {
+        val queue = Volley.newRequestQueue(this)
+        val url = "https://reports.drakonzai.com/newReport"
+                /*
                 {
                 "data": {
                     "reporter_name": "$name",
@@ -840,14 +840,36 @@ fun sendReport(
                     "datetime": "somethingsomething"
                     }
                 }
-                """.trimIndent()
-                .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
-        )
-        .build()
-
-    client.newCall(request).execute().use { response ->
-        if (!response.isSuccessful) throw IOException("Unexpected code $response")
+                */
 
     }
-
+    fun sendReport(name: String,
+                    address: String,
+                    addinfo: String,
+                    measurementValue: String,
+                    reportUUID: String,
+                    deviceInfo: String) {
+        val url = "https://reports.drakonzai.com/newReport"
+        val queue = Volley.newRequestQueue(this)
+        val jsonBody = JSONObject()
+        val data = JSONObject()
+        data.put("reporter_name", name)
+        data.put("address", address)
+        data.put("measurement", measurementValue)
+        data.put("clientInfo", deviceInfo)
+        data.put("id", reportUUID)
+        data.put("add_info", addinfo)
+        data.put("datetime", "somethingsomething")
+        jsonBody.put("data", data)
+        val request = JsonObjectRequest(
+            POST, url, jsonBody,
+            { response ->
+                Log.d("Response", response.toString())
+            },
+            { error ->
+                Log.d("Error.Response", error.toString())
+            }
+        )
+        queue.add(request)
+    }
 }

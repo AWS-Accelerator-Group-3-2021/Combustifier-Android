@@ -79,7 +79,7 @@ dependencies {
     implementation 'com.google.ar.sceneform:core:1.17.1'
     implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.17.1'
     //Okhttp
-    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation("com.android.volley:volley:1.2.1")
     //Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
 }
