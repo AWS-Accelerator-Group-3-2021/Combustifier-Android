@@ -7,7 +7,9 @@ import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
+import android.util.Base64.*
+import android.util.Base64
+import android.util.Log
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -34,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
-import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -47,6 +48,7 @@ import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import com.awsgroup3.combustifier.ui.theme.Typography
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.delay
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -241,6 +243,7 @@ fun NewCheckButton() {
         }
     }
 
+
     result.value?.let { image ->
         val f = createImageFile()
         val os = FileOutputStream(f)
@@ -253,9 +256,17 @@ fun NewCheckButton() {
         context.sendBroadcast(mediaScanIntent)
         val intent = Intent(context, SendImageActivity::class.java)
         intent.putExtra("imageBitmap", image)
-        intent.putExtra("imageUri", contentUri)
+        val base64string = BitMapToString(image)
+        intent.putExtra("imageBase64", base64string)
+        Log.d("image", base64string)
         startActivity(context, intent, null)
         
     }
 }
 
+fun BitMapToString(bitmap: Bitmap): String {
+    val baos = ByteArrayOutputStream()
+    bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
+    val b = baos.toByteArray()
+    return Base64.encodeToString(b, Base64.DEFAULT)
+}
