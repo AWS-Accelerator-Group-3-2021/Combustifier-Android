@@ -6,6 +6,8 @@ import android.app.ActivityManager
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
+import android.icu.text.DateFormat.getDateTimeInstance
+import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -15,16 +17,17 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextFieldColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.lifecycleScope
-import com.android.volley.Request
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request.Method.POST
-import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
@@ -40,9 +43,6 @@ import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.*
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.util.*
 import kotlin.math.pow
@@ -608,7 +608,7 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         textView.text = distanceTextCM
         Log.d(TAG, "distance: ${distanceTextCM}")
         Log.d(TAG, "distancem: ${distanceMeter}")
-        if (distanceMeter >= 1.2) {
+        if (distanceMeter in 0.01..1.2) {
             reportButtonCompose.setContent {
                 CombustifierTheme {
                     NewReportButton(true, distanceMeter)
@@ -735,25 +735,32 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
 
     @Composable
     private fun NewReportButton(isVisible: Boolean, measurementValue: Float) {
+        // round measurement value to 2 decimal places
+        var measurementValue = "%.2f".format(measurementValue)
+        measurementValue = "$measurementValue m"
         var name by remember { mutableStateOf("") }
         var address by remember { mutableStateOf("") }
         var addinfo by remember { mutableStateOf("") }
         val openDialog = remember { mutableStateOf(false) }
+
         val deviceInfo = Build.MANUFACTURER + " " + Build.MODEL
         val reportUUID = UUID.randomUUID().toString()
         Log.d("deviceInfo", deviceInfo)
         Log.d("reportUUID", reportUUID)
         if (isVisible) {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
+                icon = {
+                    Icon(Icons.Filled.Warning, contentDescription = null)
+                },
                 onClick = {
                     openDialog.value = true
-                }
-            ) {
-                Text("Report")
-            }
+                },
+                text = {Text("Report")}
+            )
         }
         if (openDialog.value) {
             AlertDialog(
+                textContentColor = MaterialTheme.colorScheme.inverseSurface,
                 onDismissRequest = {
                     // Dismiss the dialog when the user clicks outside the dialog or on the back
                     // button. If you want to disable that functionality, simply use an empty
@@ -767,25 +774,31 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                 text = {
                     Column() {
                         OutlinedTextField(
+
                             value = name,
                             onValueChange = { name = it },
-                            label = { Text("your name") }
+                            label = { Text("your name") },
+                            textStyle = TextStyle(color = MaterialTheme.colorScheme.inverseSurface)
                         )
                         OutlinedTextField(
                             value = address,
                             onValueChange = { address = it },
-                            label = { Text("address to report") }
+                            label = { Text("address to report") },
+                            textStyle = TextStyle(color = MaterialTheme.colorScheme.inverseSurface)
                         )
                         OutlinedTextField(
                             value = addinfo,
                             onValueChange = { addinfo = it },
-                            label = { Text("additional info") }
+                            label = { Text("additional info") },
+                            textStyle = TextStyle(color = MaterialTheme.colorScheme.inverseSurface)
                         )
                         OutlinedTextField(
+
                             value = measurementValue.toString(),
                             onValueChange = {},
                             label = { Text("measured value") },
-                            enabled = false
+                            enabled = false,
+                            textStyle = TextStyle(color = MaterialTheme.colorScheme.inverseSurface)
                         )
                     }
                 },
@@ -793,17 +806,17 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                     TextButton(
                         onClick = {
                             openDialog.value = false
-                        }
-                    ) {
-                        Text("Confirm")
                             sendReport(
                                 name,
                                 address,
                                 addinfo,
-                                measurementValue.toString(),
+                                measurementValue,
                                 reportUUID,
                                 deviceInfo
                             )
+                        }
+                    ) {
+                        Text("Confirm")
                     }
                 },
                 dismissButton = {
@@ -818,50 +831,31 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             )
         }
     }
-    fun sendReports(
-        name: String,
-        address: String,
-        addinfo: String,
-        measurementValue: String,
-        reportUUID: String,
-        deviceInfo: String
-    ) {
-        val queue = Volley.newRequestQueue(this)
-        val url = "https://reports.drakonzai.com/newReport"
-                /*
-                {
-                "data": {
-                    "reporter_name": "$name",
-                    "address": "$address",
-                    "measurement": $measurementValue,
-                    "clientInfo": "$deviceInfo",
-                    "id": "$reportUUID",
-                    "add_info": "$addinfo",
-                    "datetime": "somethingsomething"
-                    }
-                }
-                */
-
-    }
     fun sendReport(name: String,
                     address: String,
                     addinfo: String,
                     measurementValue: String,
                     reportUUID: String,
                     deviceInfo: String) {
-        val url = "https://reports.drakonzai.com/newReport"
+        //get datetime in gmt
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss z");
+        dateFormat.timeZone = TimeZone.getTimeZone("GMT");
+        val url = "https://reports.drakonzai.repl.co/newReport"
+        Log.d("url",url)
         val queue = Volley.newRequestQueue(this)
         val jsonBody = JSONObject()
         val data = JSONObject()
+
         data.put("reporter_name", name)
         data.put("address", address)
         data.put("measurement", measurementValue)
         data.put("clientInfo", deviceInfo)
         data.put("id", reportUUID)
         data.put("add_info", addinfo)
-        data.put("datetime", "somethingsomething")
+        data.put("datetime", dateFormat.format(Date()))
+        Log.d("datetime", dateFormat.format(Date()))
         jsonBody.put("data", data)
-        val request = JsonObjectRequest(
+        val request :JsonObjectRequest = object: JsonObjectRequest(
             POST, url, jsonBody,
             { response ->
                 Log.d("Response", response.toString())
@@ -869,7 +863,34 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             { error ->
                 Log.d("Error.Response", error.toString())
             }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json"
+                headers["ReportsAccessCode"] = "AWSGroup3-POCwej69"
+                return headers
+            }
+        }
+        request.retryPolicy = DefaultRetryPolicy(
+            0,
+            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
         )
         queue.add(request)
+    }
+}
+
+@Preview
+@Composable
+fun bruh() {
+    CombustifierTheme() {
+
+
+    OutlinedTextField(
+        value = "Joe",
+        onValueChange = {},
+        label = { Text("your name") },
+        textStyle = TextStyle(color = MaterialTheme.colorScheme.inverseSurface)
+    )
     }
 }
