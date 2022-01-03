@@ -606,8 +606,6 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         val textView = (distanceCardViewRenderable!!.view as LinearLayout)
             .findViewById<TextView>(R.id.distanceCard)
         textView.text = distanceTextCM
-        Log.d(TAG, "distance: ${distanceTextCM}")
-        Log.d(TAG, "distancem: ${distanceMeter}")
         if (distanceMeter in 0.01..1.2) {
             reportButtonCompose.setContent {
                 CombustifierTheme {
@@ -742,11 +740,8 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         var address by remember { mutableStateOf("") }
         var addinfo by remember { mutableStateOf("") }
         val openDialog = remember { mutableStateOf(false) }
-
-        val deviceInfo = Build.MANUFACTURER + " " + Build.MODEL
+        val deviceInfo = Build.MANUFACTURER + " " + Build.DEVICE + ", " + Build.VERSION.RELEASE
         val reportUUID = UUID.randomUUID().toString()
-        Log.d("deviceInfo", deviceInfo)
-        Log.d("reportUUID", reportUUID)
         if (isVisible) {
             ExtendedFloatingActionButton(
                 icon = {
@@ -794,7 +789,7 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                         )
                         OutlinedTextField(
 
-                            value = measurementValue.toString(),
+                            value = measurementValue,
                             onValueChange = {},
                             label = { Text("measured value") },
                             enabled = false,
@@ -837,11 +832,9 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                     measurementValue: String,
                     reportUUID: String,
                     deviceInfo: String) {
-        //get datetime in gmt
-        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss z");
-        dateFormat.timeZone = TimeZone.getTimeZone("GMT");
-        val url = "https://reports.drakonzai.repl.co/newReport"
-        Log.d("url",url)
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss z")
+        dateFormat.timeZone = TimeZone.getTimeZone("GMT")
+        val url = "http://ax55sim.asuscomm.com:5001/newReport"
         val queue = Volley.newRequestQueue(this)
         val jsonBody = JSONObject()
         val data = JSONObject()
@@ -853,7 +846,6 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         data.put("id", reportUUID)
         data.put("add_info", addinfo)
         data.put("datetime", dateFormat.format(Date()))
-        Log.d("datetime", dateFormat.format(Date()))
         jsonBody.put("data", data)
         val request :JsonObjectRequest = object: JsonObjectRequest(
             POST, url, jsonBody,
@@ -877,20 +869,5 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
             DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
         )
         queue.add(request)
-    }
-}
-
-@Preview
-@Composable
-fun bruh() {
-    CombustifierTheme() {
-
-
-    OutlinedTextField(
-        value = "Joe",
-        onValueChange = {},
-        label = { Text("your name") },
-        textStyle = TextStyle(color = MaterialTheme.colorScheme.inverseSurface)
-    )
     }
 }

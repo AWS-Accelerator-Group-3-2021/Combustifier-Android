@@ -72,8 +72,6 @@ class SendImageActivity : ComponentActivity() {
             CombustifierTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     AfterCameraScreen(imageBitmap, response = "sending")
-
-
                 }
             }
         }

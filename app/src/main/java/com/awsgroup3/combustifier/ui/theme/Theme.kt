@@ -50,7 +50,7 @@ fun CombustifierTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> DarkColorScheme
     }
     val view = LocalView.current
     if (!view.isInEditMode) {
