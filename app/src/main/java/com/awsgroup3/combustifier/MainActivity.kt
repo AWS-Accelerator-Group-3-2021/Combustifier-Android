@@ -1,21 +1,13 @@
 package com.awsgroup3.combustifier
 
-import android.content.Intent
 import android.graphics.Bitmap
-import android.icu.text.DateFormat.getDateTimeInstance
-import android.icu.text.SimpleDateFormat
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.util.Base64.*
-import android.util.Base64
-import android.util.Log
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -35,7 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -48,11 +40,9 @@ import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import com.awsgroup3.combustifier.ui.theme.Typography
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.delay
-import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.util.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 class MainActivity : ComponentActivity() {
@@ -205,14 +195,14 @@ fun TopAppBar(pageName: String) {
 )
 fun NewCheckButton() {
     val context = LocalContext.current
-    val datetime = getDateTimeInstance()
+    //get local datetime
+    val date = LocalDateTime.now()
+    val datetime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
     val result = remember { mutableStateOf<Bitmap?>(null) }
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.TakePicturePreview(
 
-        )
-    ){
-        result.value = it
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) {
     }
     ExtendedFloatingActionButton(
         modifier = Modifier
@@ -220,53 +210,17 @@ fun NewCheckButton() {
         text = { Text("New Check") },
         icon = { Icon(Icons.Filled.AddCircle, contentDescription = null) },
         onClick = {
-
-            launcher.launch()
-
+            val photoFile = File.createTempFile(
+                "combustifier_$datetime",
+                ".jpg",
+                context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            )
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                photoFile
+            )
+            launcher.launch(uri)
         }
     )
-
-    lateinit var currentPhotoPath: String
-
-    @Throws(IOException::class)
-    fun createImageFile(): File {
-        // Create an image file name
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile(
-            "combustifier_${timeStamp}_", /* prefix */
-            ".jpg", /* suffix */
-            storageDir /* directory */
-        ).apply {
-            // Save a file: path for use with ACTION_VIEW intents
-            currentPhotoPath = absolutePath
-        }
-    }
-
-
-    result.value?.let { image ->
-        val f = createImageFile()
-        val os = FileOutputStream(f)
-        image.compress(Bitmap.CompressFormat.JPEG, 100, os)
-        os.flush()
-        os.close()
-        val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-        val contentUri = Uri.fromFile(f)
-        mediaScanIntent.data = contentUri
-        context.sendBroadcast(mediaScanIntent)
-        val intent = Intent(context, SendImageActivity::class.java)
-        intent.putExtra("imageBitmap", image)
-        val base64string = BitMapToString(image)
-        intent.putExtra("imageBase64", base64string)
-        Log.d("image", base64string)
-        startActivity(context, intent, null)
-        
-    }
-}
-
-fun BitMapToString(bitmap: Bitmap): String {
-    val baos = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
-    val b = baos.toByteArray()
-    return Base64.encodeToString(b, Base64.DEFAULT)
 }
