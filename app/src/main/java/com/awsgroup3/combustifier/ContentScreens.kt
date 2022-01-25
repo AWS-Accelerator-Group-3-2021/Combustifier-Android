@@ -1,13 +1,15 @@
 package com.awsgroup3.combustifier
 
-import android.R
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Environment
 import android.util.Log
-import android.widget.ImageView
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -48,7 +50,6 @@ fun HomeScreen(navController: NavController) {
 }
 
 
-
 @ExperimentalMaterial3Api
 @Composable
 fun MeasurementScreen(navController: NavController) {
@@ -64,31 +65,14 @@ fun MeasurementScreen(navController: NavController) {
 @Composable
 fun ImageCard(picture: File) {
     val painter = rememberImagePainter(picture)
+    Log.d("imagepainter", picture.absolutePath)
     //convert the file to a painter
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        elevation = 10.dp,
-        backgroundColor = Color(0xFF2D2935)
-    ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.3f)
-                    .padding(16.dp)
-            ) {
-                Image(painter, null, alignment = Alignment.CenterStart)
-                Text("combustible",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    textAlign = TextAlign.End
-                )
-            }
-
+        Image(
+            painter,
+            null
+        )
     }
-}
+
 
 // for number of images create a imagecard
 // for each image create a row with a text and an image
@@ -96,19 +80,26 @@ fun ImageCard(picture: File) {
 @ExperimentalMaterial3Api
 @Composable
 fun ImageCardColumn() {
-    val folder = File(Environment.getExternalStorageDirectory().toString() + "/Pictures/")
+    val columnState = ScrollState(0)
+    val folder =
+        File(LocalContext.current.getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString())
     Log.d("folderPathName", folder.toString())
     //return uri of all images in folder
     val pictures = folder.listFiles()
+    // filter only jpg
+    val jpgPictures = pictures.filter { it.name.endsWith(".jpg") }
     Log.d("pictures", pictures.toString())
-        Column(
-            modifier = Modifier.padding(15.dp)
-        )
-        {
-            for (pic in pictures) {
-                Log.d("file", pic.toString())
-                ImageCard(pic)
-            }
+    Column(
+        modifier = Modifier
+            .padding(15.dp)
+            .fillMaxHeight()
+            .verticalScroll(state = columnState, enabled = true)
+    )
+    {
+        for (pic in jpgPictures) {
+            Log.d("file", pic.toString())
+            ImageCard(pic)
         }
+    }
 }
 

@@ -1,5 +1,6 @@
 package com.awsgroup3.combustifier
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Environment
@@ -25,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType.Companion.Uri
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
@@ -41,6 +43,7 @@ import com.awsgroup3.combustifier.ui.theme.Typography
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.delay
 import java.io.File
+import java.net.URI
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -82,13 +85,13 @@ fun ScreenInitializer() {
 @Composable
 fun SplashScreen(navController: NavController) {
     val scale = remember {
-        androidx.compose.animation.core.Animatable(0f)
+        androidx.compose.animation.core.Animatable(1f)
     }
 
     // AnimationEffect
     LaunchedEffect(key1 = true) {
         scale.animateTo(
-            targetValue = 0.7f,
+            targetValue = 1.7f,
             animationSpec = tween(
                 durationMillis = 800,
                 easing = {
@@ -198,11 +201,20 @@ fun NewCheckButton() {
     //get local datetime
     val date = LocalDateTime.now()
     val datetime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-    val result = remember { mutableStateOf<Bitmap?>(null) }
-
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
-    ) {
+    ) { it ->
+        // get latest image in directory
+        val dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val files = dir?.listFiles()
+        val latestFile = files?.maxByOrNull{ it.lastModified() }
+        val imageUri = android.net.Uri.fromFile(latestFile)
+        if(it) {
+            val intent = Intent(context, SendImageActivity::class.java)
+            intent.putExtra("imageUri", imageUri)
+
+        context.startActivity(intent)
+        }
     }
     ExtendedFloatingActionButton(
         modifier = Modifier
