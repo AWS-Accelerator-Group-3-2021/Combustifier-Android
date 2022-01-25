@@ -1,5 +1,6 @@
 package com.awsgroup3.combustifier
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -79,10 +80,16 @@ class SendImageActivity : ComponentActivity() {
                                 Request.Method.POST, url, jsonBody,
                                 { response ->
                                     Log.d("Response", response.toString())
-                                    val responseString = response.getString("response")
-                                    Log.d("ResponseString", responseString)
+                                    // save response
+                                    val intent = Intent(this, ImageSentActivity::class.java)
+                                    intent.putExtra("response", response.toString())
+                                    intent.putExtra("imageUri", imageUri)
+                                    startActivity(intent)
                                 },
                                 { error ->
+                                    val intent = Intent(this, ImageSentActivity::class.java)
+                                    intent.putExtra("response", error.toString())
+                                    startActivity(intent)
                                     Log.d("Error", error.toString())
                                 }
                             )
@@ -93,6 +100,7 @@ class SendImageActivity : ComponentActivity() {
                                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
                             )
                             queue.add(request)
+
                         }
 
 
@@ -115,3 +123,21 @@ fun b64encode(uri: Uri): String? {
     return base64str
 }
 
+class ImageSentActivity : ComponentActivity() {
+
+    @ExperimentalMaterial3Api
+    override fun onCreate(savedInstanceState: Bundle?) {
+        val response = intent.getStringExtra("response")
+        super.onCreate(savedInstanceState)
+        val imageUri = intent.getParcelableExtra<Uri>("imageUri")
+        setContent {
+            CombustifierTheme {
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    if (response != null) {
+                        AfterCameraScreen(imageUri, response = response)
+                    }
+                }
+            }
+        }
+    }
+}
