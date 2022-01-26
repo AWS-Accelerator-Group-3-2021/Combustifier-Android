@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Base64
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -18,8 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.android.volley.DefaultRetryPolicy
@@ -29,12 +30,12 @@ import com.android.volley.toolbox.Volley
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
-import java.util.*
+import kotlin.math.roundToInt
 
 
-@OptIn(ExperimentalCoilApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun AfterCameraScreen(image: Uri?, response : String) {
+fun AfterCameraScreen(image: Uri?, confidence: String, combustibility: String) {
 
     Log.d("UriInput", image.toString())
     CombustifierTheme() {
@@ -49,7 +50,11 @@ fun AfterCameraScreen(image: Uri?, response : String) {
                 modifier = Modifier.size(340.dp)
             )
             Text(
-                text = response,
+                text = confidence,
+                modifier = Modifier.padding(24.dp)
+            )
+            Text(
+                text = combustibility,
                 modifier = Modifier.padding(24.dp)
             )
         }
@@ -65,8 +70,8 @@ class SendImageActivity : ComponentActivity() {
         setContent {
             CombustifierTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    AfterCameraScreen(imageUri, response = "sending")
-                    if(imageUri?.let { b64encode(it) } != null) {
+                    AfterCameraScreen(imageUri, confidence = "sending", combustibility = "none")
+                    if (imageUri?.let { b64encode(it) } != null) {
                         b64encode(imageUri)?.let { Log.d("b64encode", it) }
                         val base64string = b64encode(imageUri)
                         // use Volley to send base64string
@@ -79,11 +84,15 @@ class SendImageActivity : ComponentActivity() {
                             val request = JsonObjectRequest(
                                 Request.Method.POST, url, jsonBody,
                                 { response ->
+                                    // get key 'confidence' from response
+                                    val confidence = response.getDouble("confidence").roundToInt()
+                                    Log.d("confidence", confidence.toString())
                                     Log.d("Response", response.toString())
                                     // save response
                                     val intent = Intent(this, ImageSentActivity::class.java)
-                                    intent.putExtra("response", response.toString())
+                                    intent.putExtra("confidence", "Confidence Score:${confidence}%")
                                     intent.putExtra("imageUri", imageUri)
+                                    intent.putExtra("combustibility", "Combustible")
                                     startActivity(intent)
                                 },
                                 { error ->
@@ -94,8 +103,9 @@ class SendImageActivity : ComponentActivity() {
                                 }
                             )
                             Log.d("request", request.toString())
+                            val TIMEOUT_MS = 10000
                             request.retryPolicy = DefaultRetryPolicy(
-                                DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,
+                                TIMEOUT_MS,
                                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
                             )
@@ -127,17 +137,25 @@ class ImageSentActivity : ComponentActivity() {
 
     @ExperimentalMaterial3Api
     override fun onCreate(savedInstanceState: Bundle?) {
-        val response = intent.getStringExtra("response")
+        val confidence = intent.getStringExtra("confidence")
+        val combustibility = intent.getStringExtra("combustibility")
         super.onCreate(savedInstanceState)
         val imageUri = intent.getParcelableExtra<Uri>("imageUri")
         setContent {
             CombustifierTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    if (response != null) {
-                        AfterCameraScreen(imageUri, response = response)
+                    if (confidence != null) {
+                        if (combustibility != null) {
+                            AfterCameraScreen(
+                                imageUri,
+                                confidence = confidence,
+                                combustibility = combustibility
+                            )
+                        }
+                    }
                     }
                 }
             }
         }
     }
-}
+
