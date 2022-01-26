@@ -1,6 +1,5 @@
 package com.awsgroup3.combustifier
 
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -8,7 +7,6 @@ import android.os.Bundle
 import android.util.Base64
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -16,10 +14,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -36,7 +33,6 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AfterCameraScreen(image: Uri?, confidence: String, combustibility: String) {
-
     Log.d("UriInput", image.toString())
     CombustifierTheme() {
         Column(
@@ -62,15 +58,20 @@ fun AfterCameraScreen(image: Uri?, confidence: String, combustibility: String) {
 }
 
 class SendImageActivity : ComponentActivity() {
-
     @ExperimentalMaterial3Api
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val imageUri = intent.getParcelableExtra<Uri>("imageUri")
         setContent {
+            var confidence by remember { mutableStateOf("Sending your image...") }
+            var combustibility by remember { mutableStateOf("") }
             CombustifierTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    AfterCameraScreen(imageUri, confidence = "sending", combustibility = "none")
+                    AfterCameraScreen(
+                        imageUri,
+                        confidence = confidence,
+                        combustibility = combustibility
+                    )
                     if (imageUri?.let { b64encode(it) } != null) {
                         b64encode(imageUri)?.let { Log.d("b64encode", it) }
                         val base64string = b64encode(imageUri)
@@ -84,20 +85,12 @@ class SendImageActivity : ComponentActivity() {
                             val request = JsonObjectRequest(
                                 Request.Method.POST, url, jsonBody,
                                 { response ->
-                                    val confidence = response.getDouble("confidence").roundToInt()
-                                    val combustibility = response.getString("combustibility")
+                                    confidence = response.getDouble("confidence").roundToInt().toString()
+                                    combustibility = response.getString("combustibility")
                                     Log.d("confidence", confidence.toString())
                                     Log.d("combustibility", combustibility)
-                                    val intent = Intent(this, ImageSentActivity::class.java)
-                                    intent.putExtra("confidence", "Confidence Score:${confidence}%")
-                                    intent.putExtra("combustibility", "Combustible?: $combustibility")
-                                    intent.putExtra("imageUri", imageUri)
-                                    startActivity(intent)
                                 },
                                 { error ->
-                                    val intent = Intent(this, ImageSentActivity::class.java)
-                                    intent.putExtra("response", error.toString())
-                                    startActivity(intent)
                                     Log.d("Error", error.toString())
                                 }
                             )
@@ -120,7 +113,6 @@ class SendImageActivity : ComponentActivity() {
             }
         }
     }
-
 }
 
 fun b64encode(uri: Uri): String? {
@@ -136,25 +128,24 @@ class ImageSentActivity : ComponentActivity() {
 
     @ExperimentalMaterial3Api
     override fun onCreate(savedInstanceState: Bundle?) {
-        val confidence = intent.getStringExtra("confidence")
-        val combustibility = intent.getStringExtra("combustibility")
+        //val confidence = intent.getStringExtra("confidence")
+        //val combustibility = intent.getStringExtra("combustibility")
         super.onCreate(savedInstanceState)
         val imageUri = intent.getParcelableExtra<Uri>("imageUri")
         setContent {
             CombustifierTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    if (confidence != null) {
-                        if (combustibility != null) {
-                            AfterCameraScreen(
-                                imageUri,
-                                confidence = confidence,
-                                combustibility = combustibility
-                            )
-                        }
-                    }
-                    }
+                    //if (confidence != null) {
+                    //if (combustibility != null) {
+                    // AfterCameraScreen(
+                    //   imageUri,
+                    //   confidence = confidence,
+                    //  combustibility = combustibility
+                    // )
                 }
             }
         }
     }
+}
+
 
