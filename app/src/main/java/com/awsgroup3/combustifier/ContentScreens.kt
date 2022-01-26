@@ -35,6 +35,7 @@ import java.io.File
 @ExperimentalMaterial3Api
 @Composable
 fun HomeScreen(navController: NavController) {
+
     CombustifierTheme {
         Scaffold(
             topBar = { TopAppBar(pageName = "Home") },
@@ -81,25 +82,24 @@ fun ImageCard(picture: File) {
 @Composable
 fun ImageCardColumn() {
     val columnState = ScrollState(0)
-    val folder =
-        File(LocalContext.current.getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString())
+    val folder = LocalContext.current.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     Log.d("folderPathName", folder.toString())
-    //return uri of all images in folder
-    val pictures = folder.listFiles()
-    // filter only jpg
-    val jpgPictures = pictures.filter { it.name.endsWith(".jpg") }
-    Log.d("pictures", pictures.toString())
+    val pictures = folder?.listFiles()
     Column(
         modifier = Modifier
             .padding(15.dp)
             .fillMaxHeight()
-            .verticalScroll(state = columnState, enabled = true)
     )
     {
-        for (pic in jpgPictures) {
-            Log.d("file", pic.toString())
-            ImageCard(pic)
+        if (pictures?.isNotEmpty() == true) {
+            Log.d("pictures", pictures.toString())
+            for (picture in pictures) {
+                if (picture.toString().endsWith(".jpg")) {
+                    ImageCard(picture)
+                }
+            }
         }
+        Log.d("pictures", "empty")
     }
 }
 
