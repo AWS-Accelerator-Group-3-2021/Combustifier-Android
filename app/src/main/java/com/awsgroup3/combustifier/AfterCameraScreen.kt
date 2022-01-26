@@ -84,15 +84,14 @@ class SendImageActivity : ComponentActivity() {
                             val request = JsonObjectRequest(
                                 Request.Method.POST, url, jsonBody,
                                 { response ->
-                                    // get key 'confidence' from response
                                     val confidence = response.getDouble("confidence").roundToInt()
+                                    val combustibility = response.getString("combustibility")
                                     Log.d("confidence", confidence.toString())
-                                    Log.d("Response", response.toString())
-                                    // save response
+                                    Log.d("combustibility", combustibility)
                                     val intent = Intent(this, ImageSentActivity::class.java)
                                     intent.putExtra("confidence", "Confidence Score:${confidence}%")
+                                    intent.putExtra("combustibility", "Combustible?: $combustibility")
                                     intent.putExtra("imageUri", imageUri)
-                                    intent.putExtra("combustibility", "Combustible")
                                     startActivity(intent)
                                 },
                                 { error ->
@@ -127,7 +126,7 @@ class SendImageActivity : ComponentActivity() {
 fun b64encode(uri: Uri): String? {
     val bm = BitmapFactory.decodeFile(uri.path)
     val baos = ByteArrayOutputStream()
-    bm.compress(Bitmap.CompressFormat.JPEG, 100, baos) // bm is the bitmap object
+    bm.compress(Bitmap.CompressFormat.JPEG, 80, baos) // bm is the bitmap object
     val b = baos.toByteArray()
     var base64str = Base64.encodeToString(b, Base64.DEFAULT)
     return base64str
