@@ -5,10 +5,8 @@ import android.os.Environment
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +33,6 @@ import java.io.File
 @ExperimentalMaterial3Api
 @Composable
 fun HomeScreen(navController: NavController) {
-
     CombustifierTheme {
         Scaffold(
             topBar = { TopAppBar(pageName = "Home") },
@@ -55,6 +52,8 @@ fun HomeScreen(navController: NavController) {
 @Composable
 fun MeasurementScreen(navController: NavController) {
     val intent = Intent(LocalContext.current, Measurement::class.java)
+    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     CombustifierTheme {
         //wait a few seconds before launching the activity
         ContextCompat.startActivity(LocalContext.current, intent, null)
@@ -66,13 +65,35 @@ fun MeasurementScreen(navController: NavController) {
 @Composable
 fun ImageCard(picture: File) {
     val painter = rememberImagePainter(picture)
-    Log.d("imagepainter", picture.absolutePath)
     //convert the file to a painter
-        Image(
-            painter,
-            null
-        )
+    Card(
+        modifier = Modifier
+            .height(IntrinsicSize.Max)
+            .padding(16.dp),
+        elevation = 10.dp,
+        backgroundColor = Color(0xFF2D2935)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.3f)
+                .padding(14.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.2f)
+            ) {
+            Image(painter = painter, contentDescription = null, alignment = Alignment.CenterStart, contentScale = ContentScale.Crop)}
+            Text("combustible",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                textAlign = TextAlign.End
+            )
+        }
+
     }
+}
 
 
 // for number of images create a imagecard
@@ -85,10 +106,11 @@ fun ImageCardColumn() {
     val folder = LocalContext.current.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     Log.d("folderPathName", folder.toString())
     val pictures = folder?.listFiles()
+
     Column(
         modifier = Modifier
-            .padding(15.dp)
-            .fillMaxHeight()
+            .padding(1.dp)
+            .verticalScroll(state = columnState)
     )
     {
         if (pictures?.isNotEmpty() == true) {

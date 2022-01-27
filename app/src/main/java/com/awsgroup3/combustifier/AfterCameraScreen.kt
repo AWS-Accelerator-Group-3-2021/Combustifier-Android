@@ -1,5 +1,6 @@
 package com.awsgroup3.combustifier
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -10,14 +11,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.android.volley.DefaultRetryPolicy
@@ -33,6 +33,18 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AfterCameraScreen(image: Uri?, confidence: String, combustibility: String) {
+    val context = LocalContext.current
+    if (combustibility!="") {
+        ElevatedButton(
+            onClick = {
+                val intent = Intent(context, MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+            }) {
+            Text("Go Back")
+        }
+        }
     Log.d("UriInput", image.toString())
     CombustifierTheme() {
         Column(
@@ -92,10 +104,11 @@ class SendImageActivity : ComponentActivity() {
                                 },
                                 { error ->
                                     Log.d("Error", error.toString())
+                                    combustibility = "An error occured while analysing your image"
                                 }
                             )
                             Log.d("request", request.toString())
-                            val TIMEOUT_MS = 10000
+                            val TIMEOUT_MS = 6000
                             request.retryPolicy = DefaultRetryPolicy(
                                 TIMEOUT_MS,
                                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
