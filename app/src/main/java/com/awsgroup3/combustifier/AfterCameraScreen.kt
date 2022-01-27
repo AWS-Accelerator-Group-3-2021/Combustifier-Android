@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.util.Base64
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -27,24 +28,21 @@ import com.android.volley.toolbox.Volley
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.io.File
 import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AfterCameraScreen(image: Uri?, confidence: String, combustibility: String) {
+    var combustibility_str: String
+    if(combustibility=="Yes") {
+        combustibility_str = "This object is Combustible"
+    }
+    else {
+        combustibility_str = "This object is Incombustible"
+    }
     val context = LocalContext.current
-    if (combustibility!="") {
-        ElevatedButton(
-            onClick = {
-                val intent = Intent(context, MainActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                context.startActivity(intent)
-            }) {
-            Text("Go Back")
-        }
-        }
     Log.d("UriInput", image.toString())
     CombustifierTheme() {
         Column(
@@ -58,18 +56,40 @@ fun AfterCameraScreen(image: Uri?, confidence: String, combustibility: String) {
                 modifier = Modifier.size(340.dp)
             )
             Text(
-                text = confidence,
+                text = "Confidence Score: $confidence",
                 modifier = Modifier.padding(24.dp)
             )
             Text(
-                text = combustibility,
+                text = "This object is $combustibility_str",
                 modifier = Modifier.padding(24.dp)
             )
+            if (combustibility != "") {
+                ElevatedButton(
+                    onClick = {
+                        val intent = Intent(context, MainActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(intent)
+                    }) {
+                    Text("Go Back")
+                }
+            }
         }
     }
 }
 
 class SendImageActivity : ComponentActivity() {
+    fun saveToKeyValue(key: String, value: Any?) {
+        Log.d("KeyValue", key)
+        val json = JSONObject()
+        json.put(key, value)
+        val file = File(this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "keyValueStore.json")
+        if (!file.exists()) {
+            file.createNewFile()
+        }
+        file.writeText(json.toString())
+        Log.d("keyvaluestore",file.toString())
+    }
     @ExperimentalMaterial3Api
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,14 +119,23 @@ class SendImageActivity : ComponentActivity() {
                                 { response ->
                                     confidence = response.getDouble("confidence").roundToInt().toString()
                                     combustibility = response.getString("combustibility")
-                                    Log.d("confidence", confidence.toString())
+                                    saveToKeyValue(imageUri.toString(), response)
+                                    Log.d("confidence", confidence)
                                     Log.d("combustibility", combustibility)
-                                },
-                                { error ->
-                                    Log.d("Error", error.toString())
-                                    combustibility = "An error occured while analysing your image"
                                 }
-                            )
+                            ) { error ->
+                                Log.d("Error", error.toString())
+                                // delete the file using URI
+                                imageUri.let {
+                                    val file = File(
+                                        this.getExternalFilesDir(
+                                            Environment.DIRECTORY_PICTURES
+                                        ), it.toString()
+                                    )
+                                    file.delete()
+                                }
+                                combustibility = "An error occurred while analysing your image"
+                            }
                             Log.d("request", request.toString())
                             val TIMEOUT_MS = 6000
                             request.retryPolicy = DefaultRetryPolicy(
@@ -160,5 +189,6 @@ class ImageSentActivity : ComponentActivity() {
         }
     }
 }
+
 
 
