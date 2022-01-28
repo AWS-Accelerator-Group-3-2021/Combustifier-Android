@@ -153,9 +153,11 @@ class SendImageActivity : ComponentActivity() {
                                             Environment.DIRECTORY_PICTURES
                                         ), it.toString()
                                     )
-                                    file.delete()
+                                    if(file.delete()) {
+                                        Log.d("file deleted", "true")
+                                        confidence = "An error occurred while analysing your image"
+                                    }
                                 }
-                                confidence = "An error occurred while analysing your image"
                             }
                             Log.d("request", request.toString())
                             val TIMEOUT_MS = 16000

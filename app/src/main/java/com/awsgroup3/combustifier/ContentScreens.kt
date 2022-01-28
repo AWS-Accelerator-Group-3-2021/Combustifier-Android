@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -150,15 +152,18 @@ fun ImageCardColumn() {
         if (pictures?.isNotEmpty() == true) {
             Log.d("pictures", pictures.toString())
             for (picture in pictures) {
-                if (picture.toString().endsWith(".jpg"))
-                if ((picture.nameWithoutExtension.endsWith("Yes")) or (picture.nameWithoutExtension.endsWith("No"))) {
-                    val combustibility = picture.nameWithoutExtension.split("_")[5]
-                    val confidence = picture.nameWithoutExtension.split("_")[4]
-                    ImageCard(picture, combustibility, confidence)
+                if (picture.toString().endsWith(".jpg")) {
+                    if ((picture.nameWithoutExtension.endsWith("Yes")) or (picture.nameWithoutExtension.endsWith(
+                            "No"
+                        ))
+                    ) {
+                        val combustibility = picture.nameWithoutExtension.split("_")[5]
+                        val confidence = picture.nameWithoutExtension.split("_")[4]
+                        ImageCard(picture, combustibility, confidence)
+                    }
                 }
             }
         }
-        Log.d("pictures", "empty")
     }
 }
 
