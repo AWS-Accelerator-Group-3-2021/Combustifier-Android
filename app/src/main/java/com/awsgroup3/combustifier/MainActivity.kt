@@ -1,10 +1,15 @@
 package com.awsgroup3.combustifier
 
+import android.app.Activity
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.view.animation.OvershootInterpolator
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -46,9 +51,12 @@ import java.io.File
 import java.net.URI
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
+
 
 
 class MainActivity : ComponentActivity() {
+
     @ExperimentalMaterial3Api
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -131,7 +139,7 @@ fun MainScreen() {
                 items.forEach { screen ->
                     NavigationBarItem(
                         icon = {
-                            if (stringResource(screen.resourceId) == "home") {
+                            if (stringResource(screen.resourceId) == "Home") {
                                 Icon(Icons.Filled.Home, contentDescription = null)
                             } else {
                                 Icon(
@@ -180,7 +188,7 @@ fun TopAppBar(pageName: String) {
         title = {
             Text(
                 modifier = Modifier
-                    .padding(24.dp, 48.dp, 24.dp, 24.dp),
+                    .padding(10.dp, 48.dp, 24.dp, 24.dp),
                 text = pageName,
                 fontFamily = Typography.titleLarge.fontFamily,
                 fontSize = 32.sp,
@@ -200,7 +208,12 @@ fun NewCheckButton() {
     val context = LocalContext.current
     //get local datetime
     val date = LocalDateTime.now()
-    val datetime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+    val uuid = UUID.randomUUID()
+    // cut short uuid
+    val uuidString = uuid.toString().substring(0, 8)
+    // log uuidstring
+    Log.d("uuid", uuidString)
+    val datetime = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd.HH:mm:ss"))
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { it ->
@@ -223,7 +236,7 @@ fun NewCheckButton() {
         icon = { Icon(Icons.Filled.AddCircle, contentDescription = null) },
         onClick = {
             val photoFile = File.createTempFile(
-                "combustifier_$datetime",
+                "combustifier_$uuidString",
                 ".jpg",
                 context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
             )

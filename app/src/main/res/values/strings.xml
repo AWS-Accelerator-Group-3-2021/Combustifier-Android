@@ -2,8 +2,8 @@
     <string name="app_name">Combustifier</string>
     <string name="icn_camera_view_camera_shutter_content_description">Camera Shutter</string>
     <string name="icn_camera_view_switch_camera_content_description">Flip</string>
-    <string name="home">home</string>
-    <string name="measurement">measurement</string>
+    <string name="Home">Home</string>
+    <string name="Measurement">Measurement</string>
     <string name="camera">camera</string>
     <string name="aftercamerascreen">aftercamerascreen</string>
     <string name="to_measurement_button">To Measurement</string>

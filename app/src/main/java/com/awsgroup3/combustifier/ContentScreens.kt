@@ -6,23 +6,25 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.awsgroup3.combustifier.ui.theme.CombustifierTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -63,15 +65,19 @@ fun MeasurementScreen(navController: NavController) {
 
 @ExperimentalMaterial3Api
 @Composable
-fun ImageCard(picture: File) {
-    val painter = rememberImagePainter(picture)
+fun ImageCard(picture: File, combustibility: String, confidence: String) {
+    Log.d("combustibility", combustibility)
+    Log.d("confidence", confidence)
+    // add corner radius to picture
+    val painter = rememberImagePainter(data = picture)
     //convert the file to a painter
     Card(
         modifier = Modifier
             .height(IntrinsicSize.Max)
             .padding(16.dp),
         elevation = 10.dp,
-        backgroundColor = Color(0xFF2D2935)
+        backgroundColor = Color(0xFF2D2935),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier
@@ -83,15 +89,41 @@ fun ImageCard(picture: File) {
                 modifier = Modifier
                     .fillMaxWidth(0.2f)
             ) {
-            Image(painter = painter, contentDescription = null, alignment = Alignment.CenterStart, contentScale = ContentScale.Crop)}
-            Text("combustible",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                textAlign = TextAlign.End
-            )
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    alignment = Alignment.CenterStart,
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            }
+            Column() {
+                Text(
+                    when (combustibility) {
+                        "Yes" -> "\uD83D\uDD25 Combustible"
+                        "No" -> "Incombustible"
+                        else -> "Unknown"
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    textAlign = TextAlign.End,
+                    fontFamily = FontFamily.Default,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    lineHeight = 24.sp,
+                    letterSpacing = 0.5.sp,
+                )
+                Text(
+                    "with $confidence% accuracy",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    textAlign = TextAlign.End
+                )
+            }
         }
-
     }
 }
 
@@ -102,6 +134,8 @@ fun ImageCard(picture: File) {
 @ExperimentalMaterial3Api
 @Composable
 fun ImageCardColumn() {
+
+    val context = LocalContext.current
     val columnState = ScrollState(0)
     val folder = LocalContext.current.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     Log.d("folderPathName", folder.toString())
@@ -109,15 +143,18 @@ fun ImageCardColumn() {
 
     Column(
         modifier = Modifier
-            .padding(1.dp)
+            .padding(10.dp)
             .verticalScroll(state = columnState)
     )
     {
         if (pictures?.isNotEmpty() == true) {
             Log.d("pictures", pictures.toString())
             for (picture in pictures) {
-                if (picture.toString().endsWith(".jpg")) {
-                    ImageCard(picture)
+                if (picture.toString().endsWith(".jpg"))
+                if ((picture.nameWithoutExtension.endsWith("Yes")) or (picture.nameWithoutExtension.endsWith("No"))) {
+                    val combustibility = picture.nameWithoutExtension.split("_")[5]
+                    val confidence = picture.nameWithoutExtension.split("_")[4]
+                    ImageCard(picture, combustibility, confidence)
                 }
             }
         }
@@ -125,3 +162,8 @@ fun ImageCardColumn() {
     }
 }
 
+@Composable
+fun StoreImageData(key: String, value: Any?) {
+    Log.d("imagekey", key)
+    Log.d("imagevalue", value.toString())
+}

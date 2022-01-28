@@ -834,7 +834,7 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
                     deviceInfo: String) {
         val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss z")
         dateFormat.timeZone = TimeZone.getTimeZone("GMT")
-        val url = "http://ec2-52-91-97-49.compute-1.amazonaws.com:8085/newReport"
+        val url = "http://52.91.97.49:8085/newReport"
         val queue = Volley.newRequestQueue(this)
         val jsonBody = JSONObject()
         val data = JSONObject()
