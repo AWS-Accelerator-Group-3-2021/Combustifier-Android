@@ -157,8 +157,8 @@ fun ImageCardColumn() {
                             "No"
                         ))
                     ) {
-                        val combustibility = picture.nameWithoutExtension.split("_")[5]
-                        val confidence = picture.nameWithoutExtension.split("_")[4]
+                        val combustibility = picture.nameWithoutExtension.split("_").lastIndex()
+                        val confidence = picture.nameWithoutExtension.split("_")[confidence.size - 1]
                         ImageCard(picture, combustibility, confidence)
                     }
                 }
