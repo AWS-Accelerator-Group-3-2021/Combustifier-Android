@@ -121,7 +121,7 @@ class SendImageActivity : ComponentActivity() {
                         // use Volley to send base64string
                         if (base64string != null) {
                             val queue = Volley.newRequestQueue(this)
-                            val url = "http://54.209.249.162:8080/upload"
+                            val url = "http://54.163.10.62:8080/upload"
                             val jsonBody = JSONObject()
 
                             jsonBody.put("img", base64string)
